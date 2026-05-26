@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { 
-  TrendingUp, 
-  AlertTriangle, 
-  DollarSign, 
+import {
+  TrendingUp,
+  AlertTriangle,
+  DollarSign,
   Clock,
   ArrowUpRight
 } from 'lucide-react'
@@ -72,13 +72,13 @@ function KPICard({
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-border bg-card p-5 animate-pulse">
+      <div className="rounded-xl border border-border bg-card p-5 overflow-hidden">
         <div className="flex items-start justify-between">
-          <div className="size-10 rounded-lg bg-muted" />
-          <div className="h-4 w-16 rounded bg-muted" />
+          <div className="size-10 rounded-lg skeleton-shimmer" />
+          <div className="h-4 w-16 rounded skeleton-shimmer" />
         </div>
-        <div className="mt-4 h-8 w-24 rounded bg-muted" />
-        <div className="mt-2 h-4 w-32 rounded bg-muted" />
+        <div className="mt-4 h-8 w-24 rounded skeleton-shimmer" />
+        <div className="mt-2 h-4 w-32 rounded skeleton-shimmer" />
       </div>
     )
   }
@@ -86,7 +86,7 @@ function KPICard({
   return (
     <div className={cn(
       "rounded-xl border bg-card p-5 transition-all hover:border-border/60 animate-fade-in",
-      "hover:shadow-lg hover:shadow-black/5"
+      "hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5"
     )}>
       <div className="flex items-start justify-between">
         <div className={cn("size-10 rounded-lg flex items-center justify-center", iconBgClasses[color])}>

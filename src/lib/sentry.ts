@@ -16,24 +16,22 @@ export function initSentry() {
     
     // Performance Monitoring
     tracesSampleRate: import.meta.env.PROD ? 0.2 : 1.0,
-    
+    tracePropagationTargets: [
+      'localhost',
+      /^https:\/\/.*\.supabase\.co/,
+      /^https:\/\/.*\.n8n\.cloud/,
+    ],
+
     // Session Replay for debugging user issues
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
-    
+
     // Release tracking
     release: `novasync@${import.meta.env.VITE_APP_VERSION || '1.0.0'}`,
-    
+
     // Integration configurations
     integrations: [
-      Sentry.browserTracingIntegration({
-        // Track specific operations
-        tracePropagationTargets: [
-          'localhost',
-          /^https:\/\/.*\.supabase\.co/,
-          /^https:\/\/.*\.n8n\.cloud/,
-        ],
-      }),
+      Sentry.browserTracingIntegration(),
       Sentry.replayIntegration({
         // Mask all text for privacy
         maskAllText: false,

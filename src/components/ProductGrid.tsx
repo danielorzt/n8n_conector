@@ -1,9 +1,10 @@
-import { 
-  Monitor, 
-  Laptop, 
-  Printer, 
-  Keyboard, 
-  Camera, 
+import { memo } from 'react'
+import {
+  Monitor,
+  Laptop,
+  Printer,
+  Keyboard,
+  Camera,
   Headphones,
   Package,
   LucideIcon
@@ -43,7 +44,7 @@ function ProductSkeleton() {
   )
 }
 
-function ProductCard({ product, isSelected, onClick }: {
+const ProductCard = memo(function ProductCard({ product, isSelected, onClick }: {
   product: Product
   isSelected: boolean
   onClick: () => void
@@ -69,10 +70,10 @@ function ProductCard({ product, isSelected, onClick }: {
     <button
       onClick={onClick}
       className={cn(
-        "relative w-full rounded-2xl border bg-card p-5 text-left transition-all",
-        "hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/5",
+        "group relative w-full rounded-2xl border bg-card p-5 text-left transition-all duration-200",
+        "hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/10",
         "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background",
-        isSelected && "border-primary bg-primary/5 shadow-lg shadow-primary/10",
+        isSelected && "border-primary bg-primary/5 shadow-lg shadow-primary/15 -translate-y-0.5",
         !isSelected && "border-border/50"
       )}
     >
@@ -129,13 +130,16 @@ function ProductCard({ product, isSelected, onClick }: {
 
       {/* Score Badge */}
       <div className="absolute right-3 top-3">
-        <div className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+        <div className={cn(
+          "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium transition-colors",
+          isSelected ? "bg-primary/20 text-primary" : "bg-primary/10 text-primary/70 group-hover:bg-primary/20 group-hover:text-primary"
+        )}>
           IA: {product.score_ia}/10
         </div>
       </div>
     </button>
   )
-}
+})
 
 export function ProductGrid({ products, selectedProduct, onSelectProduct, isLoading }: ProductGridProps) {
   if (isLoading) {

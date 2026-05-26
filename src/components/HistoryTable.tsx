@@ -1,7 +1,8 @@
-import { 
-  RefreshCw, 
-  CheckCircle, 
-  XCircle, 
+import { memo } from 'react'
+import {
+  RefreshCw,
+  CheckCircle,
+  XCircle,
   Clock
 } from 'lucide-react'
 import { cn, formatCOP, formatDate, formatTime } from '@/lib/utils'
@@ -12,13 +13,15 @@ interface HistoryTableProps {
   onRetry: (id: string) => void
 }
 
-export function HistoryTable({ simulations, onRetry }: HistoryTableProps) {
+export const HistoryTable = memo(function HistoryTable({ simulations, onRetry }: HistoryTableProps) {
   if (simulations.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-8 text-center">
-        <Clock className="size-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-        <p className="text-muted-foreground">No hay transacciones registradas</p>
-        <p className="text-sm text-muted-foreground/70 mt-1">
+      <div className="rounded-2xl border border-border bg-card p-12 text-center">
+        <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+          <Clock className="size-8 text-muted-foreground opacity-50" />
+        </div>
+        <p className="font-display font-semibold text-foreground/80">Sin transacciones</p>
+        <p className="text-sm text-muted-foreground/60 mt-1">
           Las simulaciones de compra apareceran aqui
         </p>
       </div>
@@ -140,4 +143,4 @@ export function HistoryTable({ simulations, onRetry }: HistoryTableProps) {
       )}
     </div>
   )
-}
+})

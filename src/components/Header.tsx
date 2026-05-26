@@ -46,6 +46,10 @@ export function Header({ webhookStatus, onSettingsClick }: HeaderProps) {
             >
               {webhookStatus === 'connected' ? (
                 <>
+                  <span className="relative flex size-2">
+                    <span className="absolute inline-flex size-full rounded-full bg-success opacity-75 animate-ping" />
+                    <span className="relative inline-flex size-2 rounded-full bg-success" />
+                  </span>
                   <Wifi className="size-3.5" />
                   <span>Conectado</span>
                 </>

@@ -144,7 +144,7 @@ export function trackProductUpdated(product: {
   posthog.capture('product_updated', {
     product_id: product.id,
     product_name: product.name,
-    changes: changes,
+    changes: product.changes,
   });
 }
 
