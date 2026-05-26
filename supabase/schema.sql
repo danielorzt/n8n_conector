@@ -18,23 +18,29 @@ create table if not exists products (
   created_at timestamptz default now()
 );
 
--- Simulations table
+-- Simulations / Ops_Alertas table
+-- Mirrors both what the app stores and what n8n writes to Google Sheets (Ops_Alertas)
 create table if not exists simulations (
   id uuid default gen_random_uuid() primary key,
+  -- Cliente
   cliente_nombre text not null,
   cliente_empresa text not null,
   cliente_email text not null,
   cliente_cargo text not null,
   cliente_telefono text not null,
+  -- Producto
   producto_id uuid references products(id) on delete set null,
   producto_nombre text not null,
   producto_codigo text not null,
   cantidad integer not null,
   total numeric not null,
+  -- Stock
   stock_post_venta integer not null,
   estado_stock text not null check (estado_stock in ('critical', 'low', 'ok')),
+  -- Ops / n8n
   webhook_url text,
   estado_envio text not null default 'pendiente' check (estado_envio in ('pendiente', 'enviado', 'error')),
+  orden_generada boolean generated always as (stock_post_venta < 5) stored,
   respuesta_n8n jsonb,
   created_at timestamptz default now()
 );
@@ -43,6 +49,6 @@ create table if not exists simulations (
 alter table products enable row level security;
 alter table simulations enable row level security;
 
--- Open policies for anon (demo/simulator app — no auth required)
+-- Open policies for anon (demo/simulator — no auth)
 create policy "anon_all_products"    on products    for all to anon using (true) with check (true);
 create policy "anon_all_simulations" on simulations for all to anon using (true) with check (true);
