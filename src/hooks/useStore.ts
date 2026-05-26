@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { Product, Simulation, CustomerData, KPIData } from '@/types'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { initialProducts } from '@/data/products'
 import { getStockStatus, formatDate, formatTime } from '@/lib/utils'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
@@ -15,6 +16,8 @@ export function useStore() {
   const [webhookStatus, setWebhookStatus] = useState<'idle' | 'checking' | 'connected' | 'error'>('idle')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
+  const channelRef = useRef<RealtimeChannel | null>(null)
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -50,6 +53,46 @@ export function useStore() {
     }
 
     loadData()
+  }, [])
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+
+    const channel = supabase
+      .channel('novasync-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setProducts(prev => {
+            const incoming = payload.new as Product
+            if (prev.some(p => p.id === incoming.id)) return prev
+            return [...prev, incoming]
+          })
+        } else if (payload.eventType === 'UPDATE') {
+          setProducts(prev => prev.map(p =>
+            p.id === (payload.new as Product).id ? (payload.new as Product) : p
+          ))
+        } else if (payload.eventType === 'DELETE') {
+          const deleted = payload.old as { id: string }
+          setProducts(prev => prev.filter(p => p.id !== deleted.id))
+        }
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'simulations' }, (payload) => {
+        setSimulations(prev => {
+          const incoming = payload.new as Simulation
+          if (prev.some(s => s.id === incoming.id)) return prev
+          return [incoming, ...prev]
+        })
+      })
+      .subscribe((status) => {
+        setRealtimeConnected(status === 'SUBSCRIBED')
+      })
+
+    channelRef.current = channel
+    return () => {
+      channel.unsubscribe()
+      channelRef.current = null
+      setRealtimeConnected(false)
+    }
   }, [])
 
   const setWebhookUrl = useCallback((url: string) => {
@@ -287,6 +330,7 @@ export function useStore() {
     webhookStatus,
     kpis,
     isLoading,
+    realtimeConnected,
     setSelectedProduct,
     setWebhookUrl,
     verifyWebhook,

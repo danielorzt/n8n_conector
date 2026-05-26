@@ -9,10 +9,11 @@ import { cn } from '@/lib/utils'
 
 interface HeaderProps {
   webhookStatus: 'idle' | 'checking' | 'connected' | 'error'
+  realtimeConnected?: boolean
   onSettingsClick: () => void
 }
 
-export function Header({ webhookStatus, onSettingsClick }: HeaderProps) {
+export function Header({ webhookStatus, realtimeConnected, onSettingsClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
       <div className="flex h-16 items-center justify-between px-6">
@@ -29,6 +30,15 @@ export function Header({ webhookStatus, onSettingsClick }: HeaderProps) {
           <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
             Simulador
           </span>
+          {realtimeConnected && (
+            <div className="flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-semibold text-success">
+              <span className="relative flex size-1.5">
+                <span className="absolute inline-flex size-full rounded-full bg-success opacity-75 animate-ping" />
+                <span className="relative inline-flex size-1.5 rounded-full bg-success" />
+              </span>
+              LIVE
+            </div>
+          )}
         </div>
 
         {/* Right side */}

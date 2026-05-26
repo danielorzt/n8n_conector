@@ -30,6 +30,13 @@ const styles = {
   info: 'bg-primary/10 border-primary/30 text-primary',
 }
 
+const progressColors = {
+  success: 'bg-success',
+  error: 'bg-destructive',
+  warning: 'bg-warning',
+  info: 'bg-primary',
+}
+
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
   const Icon = icons[toast.type]
 
@@ -41,7 +48,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
   return (
     <div
       className={cn(
-        "flex items-start gap-3 rounded-xl border p-4 shadow-lg backdrop-blur-sm animate-slide-in",
+        "relative flex items-start gap-3 rounded-xl border p-4 shadow-lg backdrop-blur-sm animate-slide-in overflow-hidden",
         "bg-card/95",
         styles[toast.type]
       )}
@@ -59,6 +66,12 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
       >
         <X className="size-4" />
       </button>
+      <div
+        className={cn(
+          "absolute bottom-0 left-0 h-0.5 animate-toast-progress opacity-50",
+          progressColors[toast.type]
+        )}
+      />
     </div>
   )
 }

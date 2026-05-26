@@ -41,9 +41,9 @@ interface ProductModalProps {
   isOpen: boolean
   onClose: () => void
   products: Product[]
-  onAdd: (product: Omit<Product, 'id' | 'created_at'>) => void
-  onEdit: (id: string, updates: Partial<Product>) => void
-  onDelete: (id: string) => void
+  onAdd: (product: Omit<Product, 'id' | 'created_at'>) => Promise<Product>
+  onEdit: (id: string, updates: Partial<Product>) => Promise<void>
+  onDelete: (id: string) => Promise<void>
 }
 
 export function ProductModal({ 
@@ -111,9 +111,9 @@ export function ProductModal({
 
     try {
       if (editingProduct) {
-        onEdit(editingProduct.id, formData)
+        await onEdit(editingProduct.id, formData)
       } else {
-        onAdd(formData)
+        await onAdd(formData)
       }
       setView('list')
       setEditingProduct(null)
@@ -122,8 +122,8 @@ export function ProductModal({
     }
   }
 
-  const handleDelete = (id: string) => {
-    onDelete(id)
+  const handleDelete = async (id: string) => {
+    await onDelete(id)
     setDeleteConfirm(null)
   }
 

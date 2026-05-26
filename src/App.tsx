@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { Settings, History, Package } from 'lucide-react'
 import { Header } from '@/components/Header'
 import { WebhookBar } from '@/components/WebhookBar'
@@ -65,14 +65,40 @@ function App() {
     addToast('info', 'Reintentando envio', 'Sincronizando con n8n...')
   }
 
+  const handleAddProduct = useCallback(async (product: Omit<Product, 'id' | 'created_at'>) => {
+    const added = await store.addProduct(product)
+    addToast('success', '✅ Producto creado', `${added.nombre} agregado al catalogo`)
+    return added
+  }, [store.addProduct, addToast])
+
+  const handleEditProduct = useCallback(async (id: string, updates: Partial<Product>) => {
+    await store.updateProduct(id, updates)
+    addToast('success', '✏️ Producto actualizado', 'Cambios guardados correctamente')
+  }, [store.updateProduct, addToast])
+
+  const handleDeleteProduct = useCallback(async (id: string) => {
+    const product = store.products.find(p => p.id === id)
+    await store.deleteProduct(id)
+    addToast('warning', '🗑️ Producto eliminado', product ? `${product.nombre} removido del catalogo` : undefined)
+  }, [store.deleteProduct, store.products, addToast])
+
+  const realtimeToastShown = useRef(false)
+  useEffect(() => {
+    if (store.realtimeConnected && !realtimeToastShown.current) {
+      realtimeToastShown.current = true
+      addToast('info', '📡 Tiempo real activo', 'Sincronizando cambios en vivo con Supabase')
+    }
+  }, [store.realtimeConnected, addToast])
+
   return (
     <div className="min-h-screen bg-background">
       {/* Toast Notifications */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* Header */}
-      <Header 
+      <Header
         webhookStatus={store.webhookStatus}
+        realtimeConnected={store.realtimeConnected}
         onSettingsClick={() => setIsProductModalOpen(true)}
       />
 
@@ -186,9 +212,9 @@ function App() {
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         products={store.products}
-        onAdd={store.addProduct}
-        onEdit={store.updateProduct}
-        onDelete={store.deleteProduct}
+        onAdd={handleAddProduct}
+        onEdit={handleEditProduct}
+        onDelete={handleDeleteProduct}
       />
     </div>
   )

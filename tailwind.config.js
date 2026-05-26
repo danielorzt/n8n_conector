@@ -76,12 +76,17 @@ export default {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        "toast-progress": {
+          "0%": { width: "100%" },
+          "100%": { width: "0%" },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
         "count-up": "count-up 0.5s ease-out",
         shimmer: "shimmer 2s infinite linear",
+        "toast-progress": "toast-progress 4s linear forwards",
       },
     },
   },
