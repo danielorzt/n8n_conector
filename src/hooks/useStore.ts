@@ -138,11 +138,18 @@ export function useStore() {
 
     let simulation: Simulation
 
+    const fallback: Simulation = {
+      ...simulationData,
+      id: crypto.randomUUID(),
+      created_at: new Date().toISOString(),
+      orden_generada: stockPostVenta < 5,
+    }
+
     if (isSupabaseConfigured) {
       const { data } = await supabase.from('simulations').insert(simulationData).select().single()
-      simulation = data ?? { ...simulationData, id: crypto.randomUUID(), created_at: new Date().toISOString() }
+      simulation = data ?? fallback
     } else {
-      simulation = { ...simulationData, id: crypto.randomUUID(), created_at: new Date().toISOString() }
+      simulation = fallback
     }
 
     setSimulations(prev => [simulation, ...prev])

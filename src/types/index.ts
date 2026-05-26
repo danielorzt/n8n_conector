@@ -28,6 +28,7 @@ export interface Simulation {
   estado_stock: 'critical' | 'low' | 'ok'
   webhook_url: string
   estado_envio: 'pendiente' | 'enviado' | 'error'
+  orden_generada: boolean
   respuesta_n8n: Record<string, unknown> | null
   created_at: string
 }
