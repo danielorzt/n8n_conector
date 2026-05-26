@@ -2,8 +2,7 @@ import {
   RefreshCw, 
   CheckCircle, 
   XCircle, 
-  Clock,
-  ExternalLink
+  Clock
 } from 'lucide-react'
 import { cn, formatCOP, formatDate, formatTime } from '@/lib/utils'
 import type { Simulation } from '@/types'

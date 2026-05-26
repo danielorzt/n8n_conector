@@ -12,8 +12,7 @@ import {
   Camera, 
   Headphones,
   Package,
-  Loader2,
-  AlertTriangle
+  Loader2
 } from 'lucide-react'
 import { cn, formatCOP } from '@/lib/utils'
 import type { Product } from '@/types'
