@@ -2,51 +2,55 @@ import { useState, useCallback, useEffect } from 'react'
 import type { Product, Simulation, CustomerData, KPIData } from '@/types'
 import { initialProducts } from '@/data/products'
 import { getStockStatus, formatDate, formatTime } from '@/lib/utils'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 
 const WEBHOOK_URL_KEY = 'novasync_webhook_url'
-const PRODUCTS_KEY = 'novasync_products'
-const SIMULATIONS_KEY = 'novasync_simulations'
-
-function loadFromStorage<T>(key: string, fallback: T): T {
-  try {
-    const stored = localStorage.getItem(key)
-    return stored ? JSON.parse(stored) : fallback
-  } catch {
-    return fallback
-  }
-}
-
-function saveToStorage<T>(key: string, value: T): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    console.error('Failed to save to localStorage')
-  }
-}
 
 export function useStore() {
-  const [products, setProducts] = useState<Product[]>(() => 
-    loadFromStorage(PRODUCTS_KEY, initialProducts)
-  )
-  const [simulations, setSimulations] = useState<Simulation[]>(() => 
-    loadFromStorage(SIMULATIONS_KEY, [])
-  )
-  const [webhookUrl, setWebhookUrlState] = useState(() => 
+  const [products, setProducts] = useState<Product[]>([])
+  const [simulations, setSimulations] = useState<Simulation[]>([])
+  const [webhookUrl, setWebhookUrlState] = useState(() =>
     localStorage.getItem(WEBHOOK_URL_KEY) || ''
   )
   const [webhookStatus, setWebhookStatus] = useState<'idle' | 'checking' | 'connected' | 'error'>('idle')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Persist products
   useEffect(() => {
-    saveToStorage(PRODUCTS_KEY, products)
-  }, [products])
+    if (!isSupabaseConfigured) {
+      setProducts(initialProducts)
+      setIsLoading(false)
+      return
+    }
 
-  // Persist simulations
-  useEffect(() => {
-    saveToStorage(SIMULATIONS_KEY, simulations)
-  }, [simulations])
+    async function loadData() {
+      setIsLoading(true)
+      try {
+        const [{ data: productsData }, { data: simulationsData }] = await Promise.all([
+          supabase.from('products').select('*').order('created_at'),
+          supabase.from('simulations').select('*').order('created_at', { ascending: false }),
+        ])
+
+        if (productsData !== null) {
+          if (productsData.length === 0) {
+            const seed = initialProducts.map(({ id: _id, created_at: _ca, ...p }) => p)
+            const { data: seeded } = await supabase.from('products').insert(seed).select()
+            setProducts(seeded ?? initialProducts)
+          } else {
+            setProducts(productsData)
+          }
+        }
+
+        if (simulationsData !== null) {
+          setSimulations(simulationsData)
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
 
   const setWebhookUrl = useCallback((url: string) => {
     setWebhookUrlState(url)
@@ -59,7 +63,6 @@ export function useStore() {
       setWebhookStatus('error')
       return false
     }
-
     setWebhookStatus('checking')
     try {
       await fetch(webhookUrl, {
@@ -75,7 +78,14 @@ export function useStore() {
     }
   }, [webhookUrl])
 
-  const addProduct = useCallback((product: Omit<Product, 'id' | 'created_at'>) => {
+  const addProduct = useCallback(async (product: Omit<Product, 'id' | 'created_at'>) => {
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase.from('products').insert(product).select().single()
+      if (!error && data) {
+        setProducts(prev => [...prev, data])
+        return data as Product
+      }
+    }
     const newProduct: Product = {
       ...product,
       id: crypto.randomUUID(),
@@ -85,17 +95,19 @@ export function useStore() {
     return newProduct
   }, [])
 
-  const updateProduct = useCallback((id: string, updates: Partial<Product>) => {
-    setProducts(prev => 
-      prev.map(p => p.id === id ? { ...p, ...updates } : p)
-    )
+  const updateProduct = useCallback(async (id: string, updates: Partial<Product>) => {
+    if (isSupabaseConfigured) {
+      await supabase.from('products').update(updates).eq('id', id)
+    }
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p))
   }, [])
 
-  const deleteProduct = useCallback((id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id))
-    if (selectedProduct?.id === id) {
-      setSelectedProduct(null)
+  const deleteProduct = useCallback(async (id: string) => {
+    if (isSupabaseConfigured) {
+      await supabase.from('products').delete().eq('id', id)
     }
+    setProducts(prev => prev.filter(p => p.id !== id))
+    if (selectedProduct?.id === id) setSelectedProduct(null)
   }, [selectedProduct])
 
   const executeSimulation = useCallback(async (
@@ -106,8 +118,7 @@ export function useStore() {
     const stockPostVenta = product.stock_actual - quantity
     const estadoStock = getStockStatus(stockPostVenta, product.stock_minimo)
 
-    const simulation: Simulation = {
-      id: crypto.randomUUID(),
+    const simulationData = {
       cliente_nombre: customer.nombre,
       cliente_empresa: customer.empresa,
       cliente_email: customer.email,
@@ -121,17 +132,22 @@ export function useStore() {
       stock_post_venta: stockPostVenta,
       estado_stock: estadoStock,
       webhook_url: webhookUrl,
-      estado_envio: 'pendiente',
+      estado_envio: 'pendiente' as const,
       respuesta_n8n: null,
-      created_at: new Date().toISOString(),
+    }
+
+    let simulation: Simulation
+
+    if (isSupabaseConfigured) {
+      const { data } = await supabase.from('simulations').insert(simulationData).select().single()
+      simulation = data ?? { ...simulationData, id: crypto.randomUUID(), created_at: new Date().toISOString() }
+    } else {
+      simulation = { ...simulationData, id: crypto.randomUUID(), created_at: new Date().toISOString() }
     }
 
     setSimulations(prev => [simulation, ...prev])
+    await updateProduct(product.id, { stock_actual: stockPostVenta })
 
-    // Update product stock
-    updateProduct(product.id, { stock_actual: stockPostVenta })
-
-    // Send to webhook
     if (webhookUrl) {
       try {
         const payload = {
@@ -161,21 +177,21 @@ export function useStore() {
           body: JSON.stringify(payload),
         })
 
-        if (response.ok) {
-          simulation.estado_envio = 'enviado'
-          simulation.respuesta_n8n = { status: response.status }
-        } else {
-          simulation.estado_envio = 'error'
-          simulation.respuesta_n8n = { status: response.status, error: 'HTTP Error' }
-        }
+        simulation.estado_envio = response.ok ? 'enviado' : 'error'
+        simulation.respuesta_n8n = { status: response.status }
       } catch (error) {
         simulation.estado_envio = 'error'
         simulation.respuesta_n8n = { error: String(error) }
       }
 
-      setSimulations(prev => 
-        prev.map(s => s.id === simulation.id ? simulation : s)
-      )
+      if (isSupabaseConfigured) {
+        await supabase.from('simulations').update({
+          estado_envio: simulation.estado_envio,
+          respuesta_n8n: simulation.respuesta_n8n,
+        }).eq('id', simulation.id)
+      }
+
+      setSimulations(prev => prev.map(s => s.id === simulation.id ? simulation : s))
     }
 
     return simulation
@@ -185,7 +201,7 @@ export function useStore() {
     const simulation = simulations.find(s => s.id === simulationId)
     if (!simulation || !webhookUrl) return
 
-    setSimulations(prev => 
+    setSimulations(prev =>
       prev.map(s => s.id === simulationId ? { ...s, estado_envio: 'pendiente' as const } : s)
     )
 
@@ -218,15 +234,27 @@ export function useStore() {
         body: JSON.stringify(payload),
       })
 
-      setSimulations(prev => 
+      const newStatus = response.ok ? 'enviado' as const : 'error' as const
+
+      if (isSupabaseConfigured) {
+        await supabase.from('simulations').update({
+          estado_envio: newStatus,
+          respuesta_n8n: { status: response.status },
+        }).eq('id', simulationId)
+      }
+
+      setSimulations(prev =>
         prev.map(s => s.id === simulationId ? {
           ...s,
-          estado_envio: response.ok ? 'enviado' as const : 'error' as const,
-          respuesta_n8n: { status: response.status }
+          estado_envio: newStatus,
+          respuesta_n8n: { status: response.status },
         } : s)
       )
     } catch {
-      setSimulations(prev => 
+      if (isSupabaseConfigured) {
+        await supabase.from('simulations').update({ estado_envio: 'error' }).eq('id', simulationId)
+      }
+      setSimulations(prev =>
         prev.map(s => s.id === simulationId ? { ...s, estado_envio: 'error' as const } : s)
       )
     }
@@ -237,7 +265,7 @@ export function useStore() {
       const today = new Date().toDateString()
       return new Date(s.created_at).toDateString() === today
     }).length,
-    productosStockCritico: products.filter(p => 
+    productosStockCritico: products.filter(p =>
       getStockStatus(p.stock_actual, p.stock_minimo) === 'critical'
     ).length,
     valorTotalMovido: simulations.reduce((acc, s) => acc + s.total, 0),
