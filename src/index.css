@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* NovaSync Dark Theme - Enterprise B2B */
+    --background: 240 10% 4%; /* #0a0a0f */
+    --foreground: 240 20% 97%; /* #f0f0ff */
+
+    --card: 240 12% 8%; /* #13131a */
+    --card-foreground: 240 20% 97%;
+
+    --popover: 240 14% 10%; /* #1c1c27 */
+    --popover-foreground: 240 20% 97%;
+
+    --primary: 248 93% 70%; /* #7c6cfa violet */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 340 90% 70%; /* #fa6c9f pink accent */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 240 12% 12%;
+    --muted-foreground: 240 20% 50%; /* #7070a0 */
+
+    --accent: 248 93% 70%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 71%; /* #f87171 red */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 69% 58%; /* #4ade80 green */
+    --success-foreground: 0 0% 10%;
+
+    --warning: 38 92% 50%; /* #fbbf24 amber */
+    --warning-foreground: 0 0% 10%;
+
+    --border: 248 60% 20%; /* violet tinted border */
+    --input: 240 12% 12%;
+    --ring: 248 93% 70%;
+
+    --radius: 1rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3),
+                0 0 40px hsl(var(--primary) / 0.1);
+  }
+
+  .glow-success {
+    box-shadow: 0 0 12px hsl(var(--success) / 0.4);
+  }
+
+  .glow-warning {
+    box-shadow: 0 0 12px hsl(var(--warning) / 0.4);
+  }
+
+  .glow-destructive {
+    box-shadow: 0 0 12px hsl(var(--destructive) / 0.4);
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+  }
+
+  .border-glow {
+    border-color: hsl(var(--primary) / 0.2);
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.5) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+}
