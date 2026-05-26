@@ -42,24 +42,22 @@ export interface CustomerData {
 }
 
 export interface WebhookPayload {
-  body: {
-    nombre: string
-    empresa: string
-    email: string
-    cargo: string
-    telefono: string
-    Score_IA: number
-    Estado_Venta: string
-    Producto_Comprado: string
-    Codigo: string
-    Cantidad: number
-    Total: number
-    Stock_Actual: number
-    Stock_Minimo: number
-    Proveedor: string
-    fecha: string
-    hora: string
-  }
+  nombre: string
+  empresa: string
+  email: string
+  cargo: string
+  telefono: string
+  Score_IA: number
+  Estado_Venta: string
+  Producto_Comprado: string
+  Codigo: string
+  Cantidad: number
+  Total: number
+  Stock_Actual: number
+  Stock_Minimo: number
+  Proveedor: string
+  fecha: string
+  hora: string
 }
 
 export interface KPIData {

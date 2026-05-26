@@ -201,24 +201,22 @@ export function useStore() {
     if (webhookUrl) {
       try {
         const payload = {
-          body: {
-            nombre: customer.nombre,
-            empresa: customer.empresa,
-            email: customer.email,
-            cargo: customer.cargo,
-            telefono: customer.telefono,
-            Score_IA: product.score_ia,
-            Estado_Venta: 'Compro',
-            Producto_Comprado: product.nombre,
-            Codigo: product.codigo,
-            Cantidad: quantity,
-            Total: product.precio * quantity,
-            Stock_Actual: stockPostVenta,
-            Stock_Minimo: product.stock_minimo,
-            Proveedor: product.proveedor,
-            fecha: formatDate(new Date()),
-            hora: formatTime(new Date()),
-          }
+          nombre: customer.nombre,
+          empresa: customer.empresa,
+          email: customer.email,
+          cargo: customer.cargo,
+          telefono: customer.telefono,
+          Score_IA: product.score_ia,
+          Estado_Venta: 'Compró',
+          Producto_Comprado: product.nombre,
+          Codigo: product.codigo,
+          Cantidad: quantity,
+          Total: product.precio * quantity,
+          Stock_Actual: stockPostVenta,
+          Stock_Minimo: product.stock_minimo,
+          Proveedor: product.proveedor,
+          fecha: formatDate(new Date()),
+          hora: formatTime(new Date()),
         }
 
         const response = await fetch(webhookUrl, {
@@ -258,24 +256,22 @@ export function useStore() {
     try {
       const product = products.find(p => p.id === simulation.producto_id)
       const payload = {
-        body: {
-          nombre: simulation.cliente_nombre,
-          empresa: simulation.cliente_empresa,
-          email: simulation.cliente_email,
-          cargo: simulation.cliente_cargo,
-          telefono: simulation.cliente_telefono,
-          Score_IA: product?.score_ia || 0,
-          Estado_Venta: 'Compro',
-          Producto_Comprado: simulation.producto_nombre,
-          Codigo: simulation.producto_codigo,
-          Cantidad: simulation.cantidad,
-          Total: simulation.total,
-          Stock_Actual: simulation.stock_post_venta,
-          Stock_Minimo: product?.stock_minimo || 0,
-          Proveedor: product?.proveedor || '',
-          fecha: formatDate(simulation.created_at),
-          hora: formatTime(simulation.created_at),
-        }
+        nombre: simulation.cliente_nombre,
+        empresa: simulation.cliente_empresa,
+        email: simulation.cliente_email,
+        cargo: simulation.cliente_cargo,
+        telefono: simulation.cliente_telefono,
+        Score_IA: product?.score_ia || 0,
+        Estado_Venta: 'Compró',
+        Producto_Comprado: simulation.producto_nombre,
+        Codigo: simulation.producto_codigo,
+        Cantidad: simulation.cantidad,
+        Total: simulation.total,
+        Stock_Actual: simulation.stock_post_venta,
+        Stock_Minimo: product?.stock_minimo || 0,
+        Proveedor: product?.proveedor || '',
+        fecha: formatDate(simulation.created_at),
+        hora: formatTime(simulation.created_at),
       }
 
       const response = await fetch(webhookUrl, {
