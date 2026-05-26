@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NovaSync — Simulador de Compras Tech</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --accent: #7c6cfa;
+    --accent2: #fa6c9f;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --text: #f0f0ff;
+    --muted: #7070a0;
+    --border: rgba(124,108,250,0.2);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+  header {
+    padding:1.5rem 2rem;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:rgba(10,10,15,0.8);
+    backdrop-filter:blur(10px);
+    position:sticky;
+    top:0;
+    z-index:100;
+  }
+  .logo { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; }
+  .logo span { color:var(--accent); }
+  .badge { background:rgba(124,108,250,0.15); color:var(--accent); font-size:0.7rem; padding:3px 10px; border-radius:20px; border:1px solid var(--border); font-weight:500; }
+
+  .webhook-bar {
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    padding:1rem 2rem;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .webhook-bar label { font-size:0.8rem; color:var(--muted); white-space:nowrap; }
+  .webhook-bar input {
+    flex:1;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:8px 14px;
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    font-size:0.85rem;
+    outline:none;
+    transition:border-color .2s;
+  }
+  .webhook-bar input:focus { border-color:var(--accent); }
+  .webhook-bar input::placeholder { color:var(--muted); }
+  .btn-verify {
+    background:rgba(124,108,250,0.15);
+    color:var(--accent);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:8px 16px;
+    cursor:pointer;
+    font-size:0.85rem;
+    font-family:'DM Sans',sans-serif;
+    transition:all .2s;
+    white-space:nowrap;
+  }
+  .btn-verify:hover { background:rgba(124,108,250,0.25); }
+  #ws-status { font-size:0.75rem; white-space:nowrap; }
+
+  main { padding:2rem; max-width:1100px; margin:0 auto; }
+
+  h2 { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:1.2rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; }
+
+  .products { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; margin-bottom:2.5rem; }
+
+  .prod {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:1.25rem;
+    cursor:pointer;
+    transition:all .2s;
+    position:relative;
+    overflow:hidden;
+  }
+  .prod::before {
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    opacity:0;
+    transition:opacity .2s;
+  }
+  .prod:hover { border-color:rgba(124,108,250,0.4); transform:translateY(-2px); }
+  .prod:hover::before { opacity:1; }
+  .prod.selected { border-color:var(--accent); background:rgba(124,108,250,0.08); }
+  .prod.selected::before { opacity:1; }
+
+  .prod-icon { font-size:2rem; margin-bottom:10px; }
+  .prod-name { font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:700; margin-bottom:4px; }
+  .prod-price { font-size:0.85rem; color:var(--accent); font-weight:500; margin-bottom:8px; }
+  .stock-badge {
+    display:inline-block;
+    font-size:0.7rem;
+    padding:3px 8px;
+    border-radius:20px;
+    font-weight:500;
+  }
+  .ok { background:rgba(74,222,128,0.15); color:var(--green); border:1px solid rgba(74,222,128,0.3); }
+  .low { background:rgba(251,191,36,0.15); color:var(--yellow); border:1px solid rgba(251,191,36,0.3); }
+  .critical { background:rgba(248,113,113,0.15); color:var(--red); border:1px solid rgba(248,113,113,0.3); }
+
+  .checkout {
+    display:none;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:1.5rem;
+    margin-bottom:1.5rem;
+  }
+  .checkout.show { display:block; }
+
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:1.2rem; }
+  .form-group label { display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; }
+  .form-group input {
+    width:100%;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:8px 12px;
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    font-size:0.85rem;
+    outline:none;
+    transition:border-color .2s;
+  }
+  .form-group input:focus { border-color:var(--accent); }
+
+  .order-summary {
+    background:var(--surface2);
+    border-radius:12px;
+    padding:1rem;
+    margin-bottom:1.2rem;
+  }
+  .order-row { display:flex; justify-content:space-between; font-size:0.85rem; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+  .order-row:last-child { border-bottom:none; font-weight:500; font-size:0.95rem; }
+  .order-label { color:var(--muted); }
+
+  .qty-control { display:flex; align-items:center; gap:12px; margin-bottom:1.2rem; }
+  .qty-control span { color:var(--muted); font-size:0.85rem; }
+  .qty-btn {
+    width:32px; height:32px;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    color:var(--text);
+    font-size:1.1rem;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:all .2s;
+  }
+  .qty-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .qty-val { font-size:1.1rem; font-weight:600; min-width:24px; text-align:center; }
+
+  .btn-comprar {
+    width:100%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    padding:14px;
+    font-family:'Syne',sans-serif;
+    font-size:1rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:opacity .2s, transform .1s;
+    letter-spacing:0.02em;
+  }
+  .btn-comprar:hover { opacity:0.9; }
+  .btn-comprar:active { transform:scale(0.98); }
+
+  .status {
+    border-radius:12px;
+    padding:1rem 1.25rem;
+    font-size:0.9rem;
+    margin-top:1rem;
+    display:none;
+    line-height:1.6;
+  }
+  .status.show { display:block; }
+  .status.sending { background:rgba(124,108,250,0.1); border:1px solid rgba(124,108,250,0.3); color:var(--accent); }
+  .status.success { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:var(--green); }
+  .status.error { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:var(--red); }
+
+  .payload-box {
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1rem;
+    font-family:'Courier New',monospace;
+    font-size:0.75rem;
+    color:var(--muted);
+    margin-top:1rem;
+    display:none;
+    white-space:pre-wrap;
+    word-break:break-all;
+    max-height:200px;
+    overflow-y:auto;
+  }
+  .payload-box.show { display:block; }
+  .payload-toggle { font-size:0.75rem; color:var(--accent); cursor:pointer; margin-top:8px; display:none; }
+  .payload-toggle.show { display:block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Nova<span>Sync</span> <span class="badge">Simulador</span></div>
+  <div style="font-size:0.8rem;color:var(--muted)">Modo prueba — webhook n8n</div>
+</header>
+
+<div class="webhook-bar">
+  <label>Webhook URL:</label>
+  <input id="wh-url" type="text" placeholder="https://xxxx.ngrok-free.dev/webhook-test/xxxxxxxx">
+  <button class="btn-verify" onclick="verificar()">Verificar</button>
+  <span id="ws-status"></span>
+</div>
+
+<main>
+  <h2>Productos disponibles</h2>
+  <div class="products" id="products"></div>
+
+  <div class="checkout" id="checkout">
+    <h2 style="margin-bottom:1.2rem">Datos del cliente</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>Nombre</label><input id="f-nombre" value="Carlos Ruiz"></div>
+      <div class="form-group"><label>Empresa</label><input id="f-empresa" value="LogiCargo S.A."></div>
+      <div class="form-group"><label>Email</label><input id="f-email" value="carlos@logicargo.com"></div>
+      <div class="form-group"><label>Cargo</label><input id="f-cargo" value="Gerente de Operaciones"></div>
+    </div>
+
+    <div class="qty-control">
+      <span>Cantidad:</span>
+      <button class="qty-btn" onclick="changeQty(-1)">−</button>
+      <span class="qty-val" id="qty">1</span>
+      <button class="qty-btn" onclick="changeQty(1)">+</button>
+    </div>
+
+    <div class="order-summary" id="summary"></div>
+
+    <button class="btn-comprar" onclick="simular()">Simular compra y enviar al flujo →</button>
+
+    <div class="status" id="status"></div>
+    <div class="payload-toggle" id="ptoggle" onclick="togglePayload()">Ver payload enviado ↓</div>
+    <div class="payload-box" id="payload"></div>
+  </div>
+</main>
+
+<script>
+const productos = [
+  {id:'MON-027',nombre:'Monitor Dell 27"',emoji:'🖥️',precio:850000,stock:3,minimo:8,proveedor:'ImportTech Bogota',score:9},
+  {id:'LAP-001',nombre:'Laptop Lenovo ThinkPad',emoji:'💻',precio:3200000,stock:12,minimo:5,proveedor:'TechCol Bogota',score:9},
+  {id:'IMP-001',nombre:'Impresora HP LaserJet',emoji:'🖨️',precio:620000,stock:2,minimo:4,proveedor:'OfficeMax Colombia',score:8},
+  {id:'TEC-003',nombre:'Teclado Logitech MX',emoji:'⌨️',precio:280000,stock:25,minimo:10,proveedor:'Logi Distribuidores',score:8},
+  {id:'CAM-005',nombre:'Camara Logitech 4K',emoji:'📷',precio:450000,stock:7,minimo:6,proveedor:'TechCol Bogota',score:9},
+  {id:'AUR-002',nombre:'Audifonos Sony WH-1000',emoji:'🎧',precio:980000,stock:4,minimo:5,proveedor:'Sony Colombia',score:9},
+];
+
+let selected = null;
+let qty = 1;
+
+function fmt(n){ return '$'+Math.round(n).toLocaleString('es-CO'); }
+function stockCls(s,m){ return s<5?'critical':s<m?'low':'ok'; }
+function stockLbl(s,m){ return s<5?'Stock crítico':s<m?'Stock bajo':'En stock'; }
+
+function renderProducts(){
+  document.getElementById('products').innerHTML = productos.map(p=>`
+    <div class="prod" id="p-${p.id}" onclick="select('${p.id}')">
+      <div class="prod-icon">${p.emoji}</div>
+      <div class="prod-name">${p.nombre}</div>
+      <div class="prod-price">${fmt(p.precio)}</div>
+      <span class="stock-badge ${stockCls(p.stock,p.minimo)}">${stockLbl(p.stock,p.minimo)} (${p.stock})</span>
+    </div>`).join('');
+}
+
+function select(id){
+  selected = productos.find(p=>p.id===id);
+  document.querySelectorAll('.prod').forEach(p=>p.classList.remove('selected'));
+  document.getElementById('p-'+id).classList.add('selected');
+  qty=1; document.getElementById('qty').textContent=1;
+  document.getElementById('checkout').classList.add('show');
+  document.getElementById('status').className='status';
+  document.getElementById('payload').className='payload-box';
+  document.getElementById('ptoggle').className='payload-toggle';
+  renderSummary();
+}
+
+function changeQty(d){
+  qty=Math.max(1,Math.min(selected.stock,qty+d));
+  document.getElementById('qty').textContent=qty;
+  renderSummary();
+}
+
+function renderSummary(){
+  if(!selected)return;
+  const stockPost = selected.stock - qty;
+  const sc = stockCls(stockPost, selected.minimo);
+  const sl = stockLbl(stockPost, selected.minimo);
+  document.getElementById('summary').innerHTML=`
+    <div class="order-row"><span class="order-label">Producto</span><span>${selected.nombre}</span></div>
+    <div class="order-row"><span class="order-label">Código</span><span>${selected.id}</span></div>
+    <div class="order-row"><span class="order-label">Precio unitario</span><span>${fmt(selected.precio)}</span></div>
+    <div class="order-row"><span class="order-label">Cantidad</span><span>${qty} uds</span></div>
+    <div class="order-row"><span class="order-label">Total</span><span>${fmt(selected.precio*qty)}</span></div>
+    <div class="order-row"><span class="order-label">Stock tras compra</span><span class="stock-badge ${sc}" style="font-size:0.8rem">${sl} (${stockPost} restantes)</span></div>`;
+}
+
+async function verificar(){
+  const url = document.getElementById('wh-url').value.trim();
+  const st = document.getElementById('ws-status');
+  if(!url){st.style.color='var(--red)';st.textContent='Ingresa una URL';return;}
+  st.style.color='var(--muted)';st.textContent='Verificando...';
+  try{
+    await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:'{"test":true}'});
+    st.style.color='var(--green)';st.textContent='✓ Conectado';
+  }catch(e){
+    st.style.color='var(--red)';st.textContent='✗ Sin conexión';
+  }
+}
+
+let lastPayload = null;
+function togglePayload(){
+  const pb = document.getElementById('payload');
+  const pt = document.getElementById('ptoggle');
+  if(pb.classList.contains('show')){
+    pb.classList.remove('show');
+    pt.textContent='Ver payload enviado ↓';
+  } else {
+    pb.classList.add('show');
+    pt.textContent='Ocultar payload ↑';
+  }
+}
+
+async function simular(){
+  const url = document.getElementById('wh-url').value.trim();
+  const st = document.getElementById('status');
+  if(!selected){st.className='status error show';st.textContent='Selecciona un producto primero.';return;}
+  if(!url){st.className='status error show';st.textContent='Ingresa la URL del webhook primero.';return;}
+
+  const payload = {
+    nombre: document.getElementById('f-nombre').value||'Carlos Ruiz',
+    empresa: document.getElementById('f-empresa').value||'LogiCargo S.A.',
+    email: document.getElementById('f-email').value||'carlos@logicargo.com',
+    cargo: document.getElementById('f-cargo').value||'Gerente',
+    telefono: '3001234567',
+    mensaje: `Compra de ${qty} unidad(es) de ${selected.nombre} por valor de ${fmt(selected.precio*qty)}`,
+    fuente: 'Simulador NovaSync',
+    Score_IA: selected.score,
+    Estado_Venta: 'Compró',
+    Producto_Comprado: selected.nombre,
+    Codigo: selected.id,
+    Cantidad: qty,
+    Total: selected.precio*qty,
+    Stock_Actual: selected.stock - qty,
+    Stock_Minimo: selected.minimo,
+    Proveedor: selected.proveedor,
+    fecha: new Date().toLocaleDateString('es-CO'),
+    hora: new Date().toLocaleTimeString('es-CO')
+  };
+
+  lastPayload = payload;
+  st.className='status sending show';
+  st.textContent='Enviando compra al flujo de n8n...';
+
+  try{
+    const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(res.ok){
+      st.className='status success show';
+      st.innerHTML=`✓ Compra enviada exitosamente<br><small style="opacity:0.8">${selected.nombre} · ${qty} ud(s) · Score: ${selected.score}/10 · Revisa Slack y Google Sheets</small>`;
+    } else {
+      st.className='status error show';
+      st.textContent='Error '+res.status+': Verifica que el webhook esté activo en n8n (Listen for test event).';
+    }
+  }catch(e){
+    st.className='status error show';
+    st.textContent='No se pudo conectar. Verifica la URL y que ngrok esté corriendo.';
+  }
+
+  document.getElementById('payload').textContent = JSON.stringify(payload,null,2);
+  document.getElementById('ptoggle').className='payload-toggle show';
+}
+
+renderProducts();
+</script>
+</body>
+</html>
