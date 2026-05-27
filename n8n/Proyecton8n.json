@@ -222,7 +222,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const geminiResponse = $input.first().json;\nconst prevData = $('⚙️ Preparar Prompt Alerta').first().json;\n\nconst mensajeIA = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';\nconst mensajeFinal = mensajeIA || prevData.mensajeSlack;\n\nreturn [{ json: { ...prevData, mensajeFinal } }];"
+        "jsCode": "const geminiResponse = $input.first().json;\nconst prevData = $('⚙️ Preparar Prompt Alerta').first().json;\n\nconst mensajeIA = (geminiResponse.text || geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();\nconst mensajeFinal = prevData.mensajeSlack + (mensajeIA ? '\\n\\n💡 *Análisis IA:*\\n' + mensajeIA : '');\n\nreturn [{ json: { ...prevData, mensajeFinal } }];"
       },
       "id": "4976debf-6403-4fd1-be6a-5749e77b289d",
       "name": "📝 Parsear Alerta IA",
