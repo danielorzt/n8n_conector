@@ -225,11 +225,21 @@ export function useStore() {
           body: JSON.stringify(payload),
         })
 
+        let responseData: Simulation['respuesta_n8n'] = null
+        try {
+          responseData = await response.clone().json()
+        } catch {
+          responseData = { status: response.status }
+        }
         simulation.estado_envio = response.ok ? 'enviado' : 'error'
-        simulation.respuesta_n8n = { status: response.status }
+        simulation.respuesta_n8n = responseData
+        const n8nStock = responseData?.stock_post_venta
+        if (response.ok && n8nStock !== undefined && n8nStock !== stockPostVenta) {
+          await updateProduct(product.id, { stock_actual: n8nStock })
+        }
       } catch (error) {
         simulation.estado_envio = 'error'
-        simulation.respuesta_n8n = { error: String(error) }
+        simulation.respuesta_n8n = { status: 0, motivo: String(error) }
       }
 
       if (isSupabaseConfigured) {
@@ -281,11 +291,12 @@ export function useStore() {
       })
 
       const newStatus = response.ok ? 'enviado' as const : 'error' as const
+      const retryData = await response.clone().json().catch(() => ({ status: response.status }))
 
       if (isSupabaseConfigured) {
         await supabase.from('simulations').update({
           estado_envio: newStatus,
-          respuesta_n8n: { status: response.status },
+          respuesta_n8n: retryData,
         }).eq('id', simulationId)
       }
 
@@ -293,7 +304,7 @@ export function useStore() {
         prev.map(s => s.id === simulationId ? {
           ...s,
           estado_envio: newStatus,
-          respuesta_n8n: { status: response.status },
+          respuesta_n8n: retryData,
         } : s)
       )
     } catch {

@@ -29,7 +29,15 @@ export interface Simulation {
   webhook_url: string
   estado_envio: 'pendiente' | 'enviado' | 'error'
   orden_generada: boolean
-  respuesta_n8n: Record<string, unknown> | null
+  respuesta_n8n: {
+    status?: number
+    orden_generada?: boolean
+    alerta?: string
+    producto?: string
+    stock_post_venta?: number
+    mensaje?: string
+    motivo?: string
+  } | null
   created_at: string
 }
 

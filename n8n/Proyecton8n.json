@@ -1,10 +1,10 @@
 {
-  "name": "My workflow 5",
+  "name": "NovaSync Ops — Flujo Conector v3",
   "nodes": [
     {
       "parameters": {
-        "content": "## 🔗 NovaSync Ops — Flujo Conector\n\n**¿Qué hace este flujo?**\nVigila el CRM (Google Sheets) cada minuto.\nCuando detecta que un lead con score ≥ 8 tiene\nestado 'Compró', conecta automáticamente con el\nflujo de inventario y notifica al equipo en Slack.\n\n**Requiere tener activos:**\n- novasync_lead_automation_v2 (llena la hoja Leads)\n- flujo_ventas_inventario (actualiza Inventario)\n\n**Credenciales a configurar:**\n- Google Sheets (OAuth2)\n- Slack (OAuth2)\n- Google Gemini API Key",
-        "height": 340,
+        "content": "## 🔗 NovaSync Ops — Flujo Conector v3\n\n**¿Qué hace este flujo?**\nRecibe compras del simulador (Vercel) vía webhook.\nNormaliza los datos del payload (Stock_Actual ya viene de Supabase)\ny decide si generar orden de recompra o solo notificar.\n\n**Fixes aplicados v3:**\n- Eliminado Google Sheets Inventario READ (innecesario)\n- Cruzar Lee stock directamente del payload (Supabase es maestro)\n- IF Score conecta directo a Cruzar (sin detour por Sheets)\n- Fan-out de Cruzar: IF Orden + Actualizar Sheets (espejo)\n\n**Credenciales a configurar:**\n- Google Sheets (OAuth2)\n- Slack (OAuth2)\n- Google Gemini API Key",
+        "height": 360,
         "width": 320,
         "color": 4
       },
@@ -12,14 +12,11 @@
       "name": "📝 Instrucciones",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [
-        -1080,
-        500
-      ]
+      "position": [-1080, 500]
     },
     {
       "parameters": {
-        "content": "### 📋 Estructura requerida en Google Sheets\n\n**Hoja: Leads** (del flujo NovaSync)\nColumnas clave:\n- Email, Nombre, Empresa, Score_IA\n- Estado_Venta (vacío al inicio)\n- Producto_Comprado\n- Fecha_Compra\n\n**Hoja: Inventario** (del flujo Ventas)\nColumnas clave:\n- Código, Producto, Stock Actual\n- Stock Mínimo, Proveedor\n\n**Hoja: Ops_Alertas** (nueva — créala)\nColumnas:\n- Fecha, Lead, Empresa, Producto\n- Stock_Post_Venta, Orden_Generada, Mensaje_Slack",
+        "content": "### 📋 Estructura Google Sheets\n\n**Hoja: Inventario**\nColumnas: Código, Producto, Categoría,\nStock Actual, Stock Mínimo, Precio Unitario,\nProveedor, Estado\n\n**Hoja: Ops_Alertas**\nColumnas: Fecha, Hora, Lead, Empresa,\nEmail, Score_IA, Producto, Código,\nCantidad, Total_Venta, Stock_Post_Venta,\nStock_Mínimo, Estado_Stock,\nOrden_Generada, Proveedor, Mensaje_Slack",
         "height": 320,
         "width": 300,
         "color": 5
@@ -28,25 +25,69 @@
       "name": "📊 Estructura Sheets",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [
-        -1080,
-        880
-      ]
+      "position": [-1080, 880]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "e263a234-ab7d-4dec-a196-544edb38b3cc",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "cbb47ff1-38ab-4bff-b930-1c1bb71124d0",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-760, 700],
+      "webhookId": "e263a234-ab7d-4dec-a196-544edb38b3cc"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {"id": "a1", "name": "nombre", "value": "={{ $json.body.nombre || '' }}", "type": "string"},
+            {"id": "a2", "name": "empresa", "value": "={{ $json.body.empresa || '' }}", "type": "string"},
+            {"id": "a3", "name": "email", "value": "={{ $json.body.email || '' }}", "type": "string"},
+            {"id": "a4", "name": "cargo", "value": "={{ $json.body.cargo || '' }}", "type": "string"},
+            {"id": "a5", "name": "Score_IA", "value": "={{ $json.body.Score_IA || 0 }}", "type": "number"},
+            {"id": "a6", "name": "Estado_Venta", "value": "={{ $json.body.Estado_Venta || '' }}", "type": "string"},
+            {"id": "a7", "name": "Producto_Comprado", "value": "={{ $json.body.Producto_Comprado || '' }}", "type": "string"},
+            {"id": "a8", "name": "Codigo", "value": "={{ $json.body.Codigo || '' }}", "type": "string"},
+            {"id": "a9", "name": "Cantidad", "value": "={{ $json.body.Cantidad || 1 }}", "type": "number"},
+            {"id": "a10", "name": "Total", "value": "={{ $json.body.Total || 0 }}", "type": "number"},
+            {"id": "a11", "name": "Stock_Actual", "value": "={{ $json.body.Stock_Actual || 0 }}", "type": "number"},
+            {"id": "a12", "name": "Stock_Minimo", "value": "={{ $json.body.Stock_Minimo || 0 }}", "type": "number"},
+            {"id": "a13", "name": "Proveedor", "value": "={{ $json.body.Proveedor || '' }}", "type": "string"},
+            {"id": "a14", "name": "fecha", "value": "={{ $json.body.fecha || '' }}", "type": "string"},
+            {"id": "a15", "name": "hora", "value": "={{ $json.body.hora || '' }}", "type": "string"},
+            {"id": "a16", "name": "fuente", "value": "={{ $json.body.fuente || 'Simulador NovaSync' }}", "type": "string"},
+            {"id": "a17", "name": "mensaje", "value": "={{ $json.body.mensaje || '' }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-norm-2024-001",
+      "name": "🔧 Normalizar Datos Webhook",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-560, 700]
     },
     {
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "strict",
-            "version": 1
+            "typeValidation": "loose",
+            "version": 2
           },
           "conditions": [
             {
               "id": "cond-score-alto",
-              "leftValue": "={{ $json.body.Score_IA }}",
-              "rightValue": "={{ 8 }}",
+              "leftValue": "={{ $json.Score_IA }}",
+              "rightValue": 8,
               "operator": {
                 "type": "number",
                 "operation": "gte"
@@ -54,7 +95,7 @@
             },
             {
               "id": "cond-compro",
-              "leftValue": "={{ $json.body.Estado_Venta }}",
+              "leftValue": "={{ $json.Estado_Venta }}",
               "rightValue": "Compró",
               "operator": {
                 "type": "string",
@@ -70,56 +111,29 @@
       "name": "🎯 ¿Score ≥ 8 y Compró?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [
-        -420,
-        700
-      ]
+      "position": [-340, 700]
     },
     {
       "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "1mqKIJnD6fNjPokLzC-82BG4ufo0zgMpxEvsowmOWq9M",
-          "mode": "list",
-          "cachedResultName": "NovaSync",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mqKIJnD6fNjPokLzC-82BG4ufo0zgMpxEvsowmOWq9M/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": 544319994,
-          "mode": "list",
-          "cachedResultName": "Inventario",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mqKIJnD6fNjPokLzC-82BG4ufo0zgMpxEvsowmOWq9M/edit#gid=544319994"
-        },
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'ignored', motivo: 'Score_IA < 8 o Estado_Venta no coincide con Compró' } }}",
         "options": {}
       },
-      "id": "05a27ec8-c57c-42c7-926d-43bded140b8b",
-      "name": "🔍 Consultar Stock Actual",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
-      "position": [
-        -200,
-        580
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "FTpPj23iveMrq8Uw",
-          "name": "Google Sheets "
-        }
-      }
+      "id": "respond-ignored-001",
+      "name": "🔁 Respond: Sin acción",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-340, 880]
     },
     {
       "parameters": {
-        "jsCode": "const lead = $('🎯 ¿Score ≥ 8 y Compró?').first().json;\nconst inventario = $input.first().json;\n\nconst webhook = lead.body || lead;\n\nconst stockActual = parseInt(inventario['Stock Actual']) || 0;\nconst stockMinimo = parseInt(inventario['Stock Mínimo']) || 0;\nconst proveedor = inventario['Proveedor'] || 'Sin proveedor';\nconst producto = inventario['Producto'] || webhook.Producto_Comprado || 'Sin producto';\nconst codigo = inventario['Código'] || 'N/A';\nconst cantidad = webhook.Cantidad || 1;\nconst total = webhook.Total || 0;\n\nconst stockBajo = stockActual < stockMinimo;\nconst stockUrgente = stockActual < 5;\nconst estadoStock = stockUrgente ? '🔴 CRÍTICO' : (stockBajo ? '🟡 BAJO' : '🟢 OK');\n\nconst fechaHora = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });\nconst fecha = new Date().toLocaleDateString('es-CO');\nconst hora = new Date().toLocaleTimeString('es-CO');\n\nconst separador = '───────────────────────';\n\nconst mensajeTrue = [\n  `🚨 *ALERTA — Stock Crítico + Venta Premium*`,\n  separador,\n  `👤 *Cliente:* ${webhook.nombre || 'Sin nombre'}`,\n  `🏢 *Empresa:* ${webhook.empresa || 'Sin empresa'}`,\n  `💼 *Cargo:* ${webhook.cargo || 'Sin cargo'}`,\n  `📧 *Email:* ${webhook.email || 'Sin email'}`,\n  `⭐ *Score IA:* ${webhook.Score_IA || 0}/10`,\n  ``,\n  `📦 *Producto:* ${producto}`,\n  `🔢 *Cantidad vendida:* ${cantidad} unidad(es)`,\n  `💰 *Total venta:* $${Math.round(total).toLocaleString('es-CO')}`,\n  `📍 *Código:* ${codigo}`,\n  ``,\n  `📊 *Estado del inventario:*`,\n  `• Stock tras venta: ${stockActual} uds`,\n  `• Stock mínimo: ${stockMinimo} uds`,\n  `• Estado: ${estadoStock}`,\n  ``,\n  `🏭 *Proveedor:* ${proveedor}`,\n  `🕐 *Fecha:* ${fecha} — ${hora}`,\n  separador,\n  `⚠️ _Se generará orden de recompra automáticamente_`\n].join('\\n');\n\nconst mensajeFalse = [\n  `✅ *Venta Premium Convertida*`,\n  separador,\n  `👤 *Cliente:* ${webhook.nombre || 'Sin nombre'}`,\n  `🏢 *Empresa:* ${webhook.empresa || 'Sin empresa'}`,\n  `💼 *Cargo:* ${webhook.cargo || 'Sin cargo'}`,\n  `📧 *Email:* ${webhook.email || 'Sin email'}`,\n  `⭐ *Score IA:* ${webhook.Score_IA || 0}/10`,\n  ``,\n  `📦 *Producto:* ${producto}`,\n  `🔢 *Cantidad vendida:* ${cantidad} unidad(es)`,\n  `💰 *Total venta:* $${Math.round(total).toLocaleString('es-CO')}`,\n  `📍 *Código:* ${codigo}`,\n  ``,\n  `📊 *Estado del inventario:*`,\n  `• Stock tras venta: ${stockActual} uds`,\n  `• Stock mínimo: ${stockMinimo} uds`,\n  `• Estado: ${estadoStock}`,\n  ``,\n  `🏭 *Proveedor:* ${proveedor}`,\n  `🕐 *Fecha:* ${fecha} — ${hora}`,\n  separador,\n  `✅ _Stock en rango normal. No se requiere reabastecimiento._`\n].join('\\n');\n\nreturn [{\n  json: {\n    leadNombre: webhook.nombre || 'Sin nombre',\n    leadEmpresa: webhook.empresa || 'Sin empresa',\n    leadEmail: webhook.email || '',\n    leadCargo: webhook.cargo || '',\n    leadScore: webhook.Score_IA || 0,\n    leadCategoria: webhook.Categoria || 'otro',\n    leadIndustria: webhook.Industria || 'otro',\n    producto,\n    codigo,\n    proveedor,\n    stockActual,\n    stockMinimo,\n    cantidad,\n    total,\n    stockBajo,\n    stockUrgente,\n    estadoStock,\n    generarOrden: stockBajo,\n    mensajeSlack: stockBajo ? mensajeTrue : mensajeFalse,\n    mensajeFinal: stockBajo ? mensajeTrue : mensajeFalse,\n    fechaHora,\n    fecha,\n    hora\n  }\n}];"
+        "jsCode": "const lead = $input.first().json;\n\nconst stockActual = lead.Stock_Actual || 0;\nconst stockMinimo = lead.Stock_Minimo || 0;\nconst proveedor = lead.Proveedor || 'Sin proveedor';\nconst producto = lead.Producto_Comprado || 'Sin producto';\nconst codigo = lead.Codigo || 'N/A';\nconst cantidad = lead.Cantidad || 1;\nconst total = lead.Total || 0;\n\nconst stockBajo = stockActual < stockMinimo;\nconst stockUrgente = stockActual < 5;\nconst estadoStock = stockUrgente ? '🔴 CRÍTICO' : (stockBajo ? '🟡 BAJO' : '🟢 OK');\n\nconst fechaHora = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });\nconst fecha = new Date().toLocaleDateString('es-CO');\nconst hora = new Date().toLocaleTimeString('es-CO');\n\nconst sep = '───────────────────────';\n\nconst msgCritico = [\n  '🚨 *ALERTA — Stock Crítico + Venta Premium*',\n  sep,\n  `👤 *Cliente:* ${lead.nombre || 'Sin nombre'}`,\n  `🏢 *Empresa:* ${lead.empresa || 'Sin empresa'}`,\n  `💼 *Cargo:* ${lead.cargo || 'Sin cargo'}`,\n  `📧 *Email:* ${lead.email || 'Sin email'}`,\n  `⭐ *Score IA:* ${lead.Score_IA || 0}/10`,\n  '',\n  `📦 *Producto:* ${producto}`,\n  `🔢 *Cantidad vendida:* ${cantidad} unidad(es)`,\n  `💰 *Total venta:* $${Math.round(total).toLocaleString('es-CO')}`,\n  `📍 *Código:* ${codigo}`,\n  '',\n  '📊 *Estado del inventario:*',\n  `• Stock tras venta: ${stockActual} uds`,\n  `• Stock mínimo: ${stockMinimo} uds`,\n  `• Estado: ${estadoStock}`,\n  '',\n  `🏭 *Proveedor:* ${proveedor}`,\n  `🕐 *Fecha:* ${fecha} — ${hora}`,\n  sep,\n  '⚠️ _Se generará orden de recompra automáticamente_'\n].join('\\n');\n\nconst msgOk = [\n  '✅ *Venta Premium Convertida*',\n  sep,\n  `👤 *Cliente:* ${lead.nombre || 'Sin nombre'}`,\n  `🏢 *Empresa:* ${lead.empresa || 'Sin empresa'}`,\n  `💼 *Cargo:* ${lead.cargo || 'Sin cargo'}`,\n  `📧 *Email:* ${lead.email || 'Sin email'}`,\n  `⭐ *Score IA:* ${lead.Score_IA || 0}/10`,\n  '',\n  `📦 *Producto:* ${producto}`,\n  `🔢 *Cantidad vendida:* ${cantidad} unidad(es)`,\n  `💰 *Total venta:* $${Math.round(total).toLocaleString('es-CO')}`,\n  `📍 *Código:* ${codigo}`,\n  '',\n  '📊 *Estado del inventario:*',\n  `• Stock tras venta: ${stockActual} uds`,\n  `• Stock mínimo: ${stockMinimo} uds`,\n  `• Estado: ${estadoStock}`,\n  '',\n  `🏭 *Proveedor:* ${proveedor}`,\n  `🕐 *Fecha:* ${fecha} — ${hora}`,\n  sep,\n  '✅ _Stock en rango normal. No se requiere reabastecimiento._'\n].join('\\n');\n\nreturn [{\n  json: {\n    leadNombre: lead.nombre || 'Sin nombre',\n    leadEmpresa: lead.empresa || 'Sin empresa',\n    leadEmail: lead.email || '',\n    leadCargo: lead.cargo || '',\n    leadScore: lead.Score_IA || 0,\n    producto,\n    codigo,\n    proveedor,\n    stockActual,\n    stockMinimo,\n    cantidad,\n    total,\n    stockBajo,\n    stockUrgente,\n    estadoStock,\n    generarOrden: stockBajo,\n    mensajeSlack: stockBajo ? msgCritico : msgOk,\n    mensajeFinal: stockBajo ? msgCritico : msgOk,\n    fechaHora,\n    fecha,\n    hora\n  }\n}];"
       },
       "id": "626fbaca-6127-41f0-9023-06b1d33e7310",
       "name": "⚙️ Cruzar Lead + Inventario",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        20,
-        580
-      ]
+      "position": [340, 580]
     },
     {
       "parameters": {
@@ -147,36 +161,74 @@
       "name": "⚠️ ¿Generar Orden?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [
-        240,
-        580
-      ]
+      "position": [560, 580]
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first().json;\n\nconst prompt = `Eres un asistente experto en gestión de inventario y ventas B2B en Colombia.\n\nAcabas de procesar una venta a un cliente premium. El stock del producto vendido bajó del mínimo requerido. Genera un mensaje ejecutivo de Slack (máximo 5 líneas, formato bullet points con emojis) que resuma:\n1. La oportunidad de negocio (cliente + industria)\n2. El estado crítico del inventario\n3. La acción inmediata recomendada al equipo\n\nUsa un tono profesional pero urgente. El mensaje debe motivar al equipo a actuar rápido.\n\nDATOS:\n- Cliente: ${item.leadNombre} — ${item.leadEmpresa}\n- Industria: ${item.leadIndustria}\n- Score Lead: ${item.leadScore}/10\n- Producto: ${item.producto} (${item.codigo})\n- Stock actual: ${item.stockActual} unidades\n- Stock mínimo: ${item.stockMinimo} unidades\n- Proveedor: ${item.proveedor}\n- Estado: ${item.estadoStock}\n\nResponde SOLO con el mensaje de Slack, sin comillas ni texto adicional.`;\n\nconst geminiBody = JSON.stringify({\n  contents: [{ parts: [{ text: prompt }] }],\n  generationConfig: { temperature: 0.4, maxOutputTokens: 400 }\n});\n\nreturn [{ json: { ...item, prompt, geminiBody } }];"
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'ok', orden_generada: true, producto: $json.producto, stock_post_venta: $json.stockActual, alerta: $json.estadoStock, mensaje: 'Orden de recompra generada — revisa Slack' } }}",
+        "options": {}
+      },
+      "id": "respond-critico-001",
+      "name": "🔁 Respond: Orden Generada",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [780, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'ok', orden_generada: false, producto: $json.producto, stock_post_venta: $json.stockActual, alerta: $json.estadoStock, mensaje: 'Venta procesada — stock en rango normal' } }}",
+        "options": {}
+      },
+      "id": "respond-ok-001",
+      "name": "🔁 Respond: Venta Procesada",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [780, 780]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst prompt = `Eres un asistente experto en gestión de inventario y ventas B2B en Colombia.\\n\\nAcabas de procesar una venta a un cliente premium. El stock del producto vendido bajó del mínimo requerido. Genera un mensaje ejecutivo de Slack (máximo 5 líneas, formato bullet points con emojis) que resuma:\\n1. La oportunidad de negocio (cliente + empresa)\\n2. El estado crítico del inventario\\n3. La acción inmediata recomendada al equipo\\n\\nUsa un tono profesional pero urgente. El mensaje debe motivar al equipo a actuar rápido.\\n\\nDATOS:\\n- Cliente: ${item.leadNombre} — ${item.leadEmpresa}\\n- Score Lead: ${item.leadScore}/10\\n- Producto: ${item.producto} (${item.codigo})\\n- Stock actual: ${item.stockActual} unidades\\n- Stock mínimo: ${item.stockMinimo} unidades\\n- Proveedor: ${item.proveedor}\\n- Estado: ${item.estadoStock}\\n\\nResponde SOLO con el mensaje de Slack, sin comillas ni texto adicional.`;\n\nconst geminiBody = JSON.stringify({\n  contents: [{ parts: [{ text: prompt }] }],\n  generationConfig: { temperature: 0.4, maxOutputTokens: 400 }\n});\n\nreturn [{ json: { ...item, prompt, geminiBody } }];"
       },
       "id": "500410b2-dbd6-4f7c-9881-46be608eb404",
       "name": "⚙️ Preparar Prompt Alerta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        460,
-        460
-      ]
+      "position": [1000, 480]
     },
     {
       "parameters": {
-        "jsCode": "const geminiResponse = $input.first().json;\nconst prevData = $('⚙️ Preparar Prompt Alerta').first().json;\n\nlet mensajeIA = '';\ntry {\n  mensajeIA = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';\n} catch(e) {\n  mensajeIA = prevData.mensajeSlack;\n}\n\nconst mensajeFinal = mensajeIA.trim() || prevData.mensajeSlack;\n\nreturn [{ json: { ...prevData, mensajeFinal } }];"
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "Content-Type", "value": "application/json"},
+            {"name": "x-goog-api-key", "value": "AIzaSyAB_tGHTLTsRQ--5wSOg1Ai7f7lfYRuwt4"}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.geminiBody }}",
+        "options": {}
+      },
+      "id": "cc7f40a8-b063-4154-8b96-07c6afba77ce",
+      "name": "🤖 Gemini - Generar Orden",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1220, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "const geminiResponse = $input.first().json;\nconst prevData = $('⚙️ Preparar Prompt Alerta').first().json;\n\nconst mensajeIA = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';\nconst mensajeFinal = mensajeIA || prevData.mensajeSlack;\n\nreturn [{ json: { ...prevData, mensajeFinal } }];"
       },
       "id": "4976debf-6403-4fd1-be6a-5749e77b289d",
       "name": "📝 Parsear Alerta IA",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        900,
-        460
-      ]
+      "position": [1440, 480]
     },
     {
       "parameters": {
@@ -187,18 +239,13 @@
           "mode": "name"
         },
         "text": "={{ $json.mensajeFinal }}",
-        "otherOptions": {
-          "mrkdwn": true
-        }
+        "otherOptions": {"mrkdwn": true}
       },
       "id": "7a8db477-c3be-4537-a9c0-676750dec23b",
       "name": "📣 Slack — Alerta Stock Crítico",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.1,
-      "position": [
-        1120,
-        460
-      ],
+      "position": [1660, 480],
       "credentials": {
         "slackApi": {
           "id": "7Qns5AljUCiLXtf4",
@@ -215,22 +262,60 @@
           "mode": "name"
         },
         "text": "={{ $json.mensajeSlack }}",
-        "otherOptions": {
-          "mrkdwn": true
-        }
+        "otherOptions": {"mrkdwn": true}
       },
       "id": "e03d92e6-fd01-4af6-8d50-9106aa2d1a98",
       "name": "📣 Slack — Notificación Venta",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.1,
-      "position": [
-        460,
-        700
-      ],
+      "position": [1000, 700],
       "credentials": {
         "slackApi": {
           "id": "7Qns5AljUCiLXtf4",
           "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1mqKIJnD6fNjPokLzC-82BG4ufo0zgMpxEvsowmOWq9M",
+          "mode": "list",
+          "cachedResultName": "NovaSync",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mqKIJnD6fNjPokLzC-82BG4ufo0zgMpxEvsowmOWq9M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 544319994,
+          "mode": "list",
+          "cachedResultName": "Inventario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mqKIJnD6fNjPokLzC-82BG4ufo0zgMpxEvsowmOWq9M/edit#gid=544319994"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Código": "={{ $json.codigo }}",
+            "Stock Actual": "={{ $json.stockActual }}"
+          },
+          "matchingColumns": ["Código"],
+          "schema": [
+            {"id": "Código", "displayName": "Código", "required": false, "defaultMatch": true, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Stock Actual", "displayName": "Stock Actual", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "sheets-update-001",
+      "name": "🔄 Actualizar Stock en Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [340, 760],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FTpPj23iveMrq8Uw",
+          "name": "Google Sheets "
         }
       }
     },
@@ -258,172 +343,37 @@
             "Hora": "={{ $json.hora }}",
             "Lead": "={{ $json.leadNombre }}",
             "Email": "={{ $json.leadEmail }}",
+            "Empresa": "={{ $json.leadEmpresa }}",
             "Total_Venta": "={{ $json.total }}",
             "Cantidad": "={{ $json.cantidad }}",
             "Código": "={{ $json.codigo }}",
+            "Producto": "={{ $json.producto }}",
             "Score_IA": "={{ $json.leadScore }}",
             "Stock_Post_Venta": "={{ $json.stockActual }}",
             "Stock_Mínimo": "={{ $json.stockMinimo }}",
             "Estado_Stock": "={{ $json.estadoStock }}",
             "Orden_Generada": "={{ $json.generarOrden ? 'Sí' : 'No' }}",
             "Proveedor": "={{ $json.proveedor }}",
-            "Empresa": "={{ $json.leadEmpresa }}",
-            "Producto": "={{ $json.producto }}"
+            "Mensaje_Slack": "={{ $json.mensajeFinal }}"
           },
-          "matchingColumns": [
-            "row_number"
-          ],
+          "matchingColumns": ["row_number"],
           "schema": [
-            {
-              "id": "Fecha",
-              "displayName": "Fecha",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Hora",
-              "displayName": "Hora",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Lead",
-              "displayName": "Lead",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Empresa",
-              "displayName": "Empresa",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Email",
-              "displayName": "Email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Score_IA",
-              "displayName": "Score_IA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Producto",
-              "displayName": "Producto",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Código",
-              "displayName": "Código",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Cantidad",
-              "displayName": "Cantidad",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Total_Venta",
-              "displayName": "Total_Venta",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Stock_Post_Venta",
-              "displayName": "Stock_Post_Venta",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Stock_Mínimo",
-              "displayName": "Stock_Mínimo",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Estado_Stock",
-              "displayName": "Estado_Stock",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Orden_Generada",
-              "displayName": "Orden_Generada",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Proveedor",
-              "displayName": "Proveedor",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
+            {"id": "Fecha", "displayName": "Fecha", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Hora", "displayName": "Hora", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Lead", "displayName": "Lead", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Empresa", "displayName": "Empresa", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Email", "displayName": "Email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Score_IA", "displayName": "Score_IA", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Producto", "displayName": "Producto", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Código", "displayName": "Código", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Cantidad", "displayName": "Cantidad", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Total_Venta", "displayName": "Total_Venta", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Stock_Post_Venta", "displayName": "Stock_Post_Venta", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Stock_Mínimo", "displayName": "Stock_Mínimo", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Estado_Stock", "displayName": "Estado_Stock", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Orden_Generada", "displayName": "Orden_Generada", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Proveedor", "displayName": "Proveedor", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Mensaje_Slack", "displayName": "Mensaje_Slack", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false}
           ]
         },
         "options": {}
@@ -432,177 +382,76 @@
       "name": "📊 Registrar en Ops_Alertas",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
-      "position": [
-        680,
-        700
-      ],
+      "position": [1220, 700],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "FTpPj23iveMrq8Uw",
           "name": "Google Sheets "
         }
       }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            },
-            {
-              "name": "x-goog-api-key",
-              "value": "AIzaSyAB_tGHTLTsRQ--5wSOg1Ai7f7lfYRuwt4"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ $json.geminiBody }}",
-        "options": {}
-      },
-      "id": "cc7f40a8-b063-4154-8b96-07c6afba77ce",
-      "name": "🤖 Gemini - Generar Orden",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [
-        700,
-        460
-      ]
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "e263a234-ab7d-4dec-a196-544edb38b3cc",
-        "options": {}
-      },
-      "id": "cbb47ff1-38ab-4bff-b930-1c1bb71124d0",
-      "name": "Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        -680,
-        700
-      ],
-      "webhookId": "e263a234-ab7d-4dec-a196-544edb38b3cc"
     }
   ],
   "pinData": {},
   "connections": {
-    "🎯 ¿Score ≥ 8 y Compró?": {
+    "Webhook": {
       "main": [
-        [
-          {
-            "node": "🔍 Consultar Stock Actual",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "🔧 Normalizar Datos Webhook", "type": "main", "index": 0}]
       ]
     },
-    "🔍 Consultar Stock Actual": {
+    "🔧 Normalizar Datos Webhook": {
       "main": [
-        [
-          {
-            "node": "⚙️ Cruzar Lead + Inventario",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "🎯 ¿Score ≥ 8 y Compró?", "type": "main", "index": 0}]
+      ]
+    },
+    "🎯 ¿Score ≥ 8 y Compró?": {
+      "main": [
+        [{"node": "⚙️ Cruzar Lead + Inventario", "type": "main", "index": 0}],
+        [{"node": "🔁 Respond: Sin acción", "type": "main", "index": 0}]
       ]
     },
     "⚙️ Cruzar Lead + Inventario": {
       "main": [
         [
-          {
-            "node": "⚠️ ¿Generar Orden?",
-            "type": "main",
-            "index": 0
-          }
+          {"node": "⚠️ ¿Generar Orden?", "type": "main", "index": 0},
+          {"node": "🔄 Actualizar Stock en Sheets", "type": "main", "index": 0}
         ]
       ]
     },
     "⚠️ ¿Generar Orden?": {
       "main": [
         [
-          {
-            "node": "⚙️ Preparar Prompt Alerta",
-            "type": "main",
-            "index": 0
-          }
+          {"node": "⚙️ Preparar Prompt Alerta", "type": "main", "index": 0},
+          {"node": "🔁 Respond: Orden Generada", "type": "main", "index": 0}
         ],
         [
-          {
-            "node": "📣 Slack — Notificación Venta",
-            "type": "main",
-            "index": 0
-          }
+          {"node": "📣 Slack — Notificación Venta", "type": "main", "index": 0},
+          {"node": "🔁 Respond: Venta Procesada", "type": "main", "index": 0}
         ]
       ]
     },
     "⚙️ Preparar Prompt Alerta": {
       "main": [
-        [
-          {
-            "node": "🤖 Gemini - Generar Orden",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "📝 Parsear Alerta IA": {
-      "main": [
-        [
-          {
-            "node": "📣 Slack — Alerta Stock Crítico",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "📊 Registrar en Ops_Alertas",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "📣 Slack — Notificación Venta": {
-      "main": [
-        [
-          {
-            "node": "📊 Registrar en Ops_Alertas",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "🤖 Gemini - Generar Orden", "type": "main", "index": 0}]
       ]
     },
     "🤖 Gemini - Generar Orden": {
       "main": [
-        [
-          {
-            "node": "📝 Parsear Alerta IA",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "📝 Parsear Alerta IA", "type": "main", "index": 0}]
       ]
     },
-    "Webhook": {
+    "📝 Parsear Alerta IA": {
       "main": [
-        [
-          {
-            "node": "🎯 ¿Score ≥ 8 y Compró?",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "📣 Slack — Alerta Stock Crítico", "type": "main", "index": 0}]
+      ]
+    },
+    "📣 Slack — Alerta Stock Crítico": {
+      "main": [
+        [{"node": "📊 Registrar en Ops_Alertas", "type": "main", "index": 0}]
+      ]
+    },
+    "📣 Slack — Notificación Venta": {
+      "main": [
+        [{"node": "📊 Registrar en Ops_Alertas", "type": "main", "index": 0}]
       ]
     }
   },
@@ -610,30 +459,15 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "063496ca-8eff-4b02-8ed2-cbb2e2fc3748",
+  "versionId": "163496ca-8eff-4b02-8ed2-cbb2e2fc3748",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0ec3e505ce2fb9ba0888f69fae195acb32010e556d33d1bc8cad669784255a88"
   },
   "id": "dVqEwHttRRBG1WIm",
   "tags": [
-    {
-      "name": "NovaSync",
-      "id": "LTa3nmujgTAjxXNv",
-      "createdAt": "2026-05-16T14:24:23.421Z",
-      "updatedAt": "2026-05-16T14:24:23.421Z"
-    },
-    {
-      "name": "Gemini Free",
-      "id": "MpWueOLFF0dmoQzJ",
-      "createdAt": "2026-05-16T14:24:23.479Z",
-      "updatedAt": "2026-05-16T14:24:23.479Z"
-    },
-    {
-      "name": "Ops",
-      "id": "dTXSmvoQeNM5fQo9",
-      "createdAt": "2026-05-16T14:24:23.454Z",
-      "updatedAt": "2026-05-16T14:24:23.454Z"
-    }
+    {"name": "NovaSync", "id": "LTa3nmujgTAjxXNv", "createdAt": "2026-05-16T14:24:23.421Z", "updatedAt": "2026-05-16T14:24:23.421Z"},
+    {"name": "Gemini Free", "id": "MpWueOLFF0dmoQzJ", "createdAt": "2026-05-16T14:24:23.479Z", "updatedAt": "2026-05-16T14:24:23.479Z"},
+    {"name": "Ops", "id": "dTXSmvoQeNM5fQo9", "createdAt": "2026-05-16T14:24:23.454Z", "updatedAt": "2026-05-16T14:24:23.454Z"}
   ]
 }

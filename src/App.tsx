@@ -38,7 +38,14 @@ function App() {
       const simulation = await store.executeSimulation(product, quantity, customer)
       
       if (simulation.estado_envio === 'enviado') {
-        addToast('success', 'Transaccion completada', `Orden de ${product.nombre} sincronizada con n8n`)
+        const alerta = simulation.respuesta_n8n?.alerta
+        const ordenGenerada = simulation.respuesta_n8n?.orden_generada
+        const alertaLabel = alerta?.includes('CRÍTICO') ? '🔴 Stock crítico'
+          : alerta?.includes('BAJO') ? '🟡 Stock bajo'
+          : alerta ? '🟢 Stock OK' : ''
+        const extra = alertaLabel ? ` · ${alertaLabel}` : ''
+        const ordenMsg = ordenGenerada ? ' · Orden de recompra generada' : ''
+        addToast('success', 'Transaccion completada', `${product.nombre}${extra}${ordenMsg}`)
       } else if (simulation.estado_envio === 'error') {
         addToast('error', 'Error de sincronizacion', 'La orden fue registrada pero no se pudo enviar al webhook')
       } else {
