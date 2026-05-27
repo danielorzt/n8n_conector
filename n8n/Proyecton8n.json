@@ -205,7 +205,7 @@
         "headerParameters": {
           "parameters": [
             {"name": "Content-Type", "value": "application/json"},
-            {"name": "x-goog-api-key", "value": "AIzaSyAB_tGHTLTsRQ--5wSOg1Ai7f7lfYRuwt4"}
+            {"name": "x-goog-api-key", "value": "AIzaSyDI2S_g3amRLoPwzPyRwYBTVCnKfVFpsgE"}
           ]
         },
         "sendBody": true,
@@ -351,8 +351,8 @@
             "Score_IA": "={{ $json.leadScore }}",
             "Stock_Post_Venta": "={{ $json.stockActual }}",
             "Stock_Mínimo": "={{ $json.stockMinimo }}",
-            "Estado_Stock": "={{ $json.estadoStock }}",
-            "Orden_Generada": "={{ $json.generarOrden ? 'Sí' : 'No' }}",
+            "Estado_Stock": "={{ $json.stockUrgente ? 'CRITICO' : $json.stockBajo ? 'BAJO' : 'OK' }}",
+            "Orden_Generada": "={{ $json.generarOrden ? 'Si' : 'No' }}",
             "Proveedor": "={{ $json.proveedor }}",
             "Mensaje_Slack": "={{ $json.mensajeFinal }}"
           },
@@ -413,7 +413,8 @@
       "main": [
         [
           {"node": "⚠️ ¿Generar Orden?", "type": "main", "index": 0},
-          {"node": "🔄 Actualizar Stock en Sheets", "type": "main", "index": 0}
+          {"node": "🔄 Actualizar Stock en Sheets", "type": "main", "index": 0},
+          {"node": "📊 Registrar en Ops_Alertas", "type": "main", "index": 0}
         ]
       ]
     },
@@ -445,14 +446,10 @@
       ]
     },
     "📣 Slack — Alerta Stock Crítico": {
-      "main": [
-        [{"node": "📊 Registrar en Ops_Alertas", "type": "main", "index": 0}]
-      ]
+      "main": [[]]
     },
     "📣 Slack — Notificación Venta": {
-      "main": [
-        [{"node": "📊 Registrar en Ops_Alertas", "type": "main", "index": 0}]
-      ]
+      "main": [[]]
     }
   },
   "active": false,

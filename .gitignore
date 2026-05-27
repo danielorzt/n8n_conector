@@ -43,3 +43,4 @@ skills-lock.json
 coverage/
 
 .vercel
+.claude/settings.local.json
