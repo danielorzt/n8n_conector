@@ -362,7 +362,8 @@
         "text": "={{ $json.mensajeFinal }}",
         "otherOptions": {
           "mrkdwn": true
-        }
+        },
+        "authentication": "oAuth2"
       },
       "id": "7a8db477-c3be-4537-a9c0-676750dec23b",
       "name": "📣 Slack — Alerta Stock Crítico",
@@ -373,8 +374,8 @@
         480
       ],
       "credentials": {
-        "slackApi": {
-          "id": "7Qns5AljUCiLXtf4",
+        "slackOAuth2Api": {
+          "id": "O8Uqf48D3uWhaSyp",
           "name": "Slack account"
         }
       }
@@ -390,7 +391,8 @@
         "text": "={{ $json.mensajeSlack }}",
         "otherOptions": {
           "mrkdwn": true
-        }
+        },
+        "authentication": "oAuth2"
       },
       "id": "e03d92e6-fd01-4af6-8d50-9106aa2d1a98",
       "name": "📣 Slack — Notificación Venta",
@@ -401,8 +403,8 @@
         700
       ],
       "credentials": {
-        "slackApi": {
-          "id": "7Qns5AljUCiLXtf4",
+        "slackOAuth2Api": {
+          "id": "O8Uqf48D3uWhaSyp",
           "name": "Slack account"
         }
       }
