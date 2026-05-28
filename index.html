@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" class="dark bg-background">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -11,6 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   </head>
+  <!-- Anti-FOUC: apply saved theme before React hydrates -->
+  <script>try{const t=localStorage.getItem('novasync_theme')||'dark';if(t==='dark')document.documentElement.classList.add('dark')}catch(e){document.documentElement.classList.add('dark')}</script>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

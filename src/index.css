@@ -3,21 +3,60 @@
 @tailwind utilities;
 
 @layer base {
+  /* ── Light theme (default) ── */
   :root {
-    /* NovaSync Dark Theme - Enterprise B2B */
-    --background: 240 10% 4%; /* #0a0a0f */
-    --foreground: 240 20% 97%; /* #f0f0ff */
+    --background: 220 20% 97%;       /* #f3f4f8 */
+    --foreground: 224 71% 8%;        /* #0c0e1a */
 
-    --card: 240 12% 8%; /* #13131a */
-    --card-foreground: 240 20% 97%;
+    --card: 0 0% 100%;               /* #ffffff */
+    --card-foreground: 224 71% 8%;
 
-    --popover: 240 14% 10%; /* #1c1c27 */
-    --popover-foreground: 240 20% 97%;
+    --popover: 220 16% 94%;          /* #eef0f5 */
+    --popover-foreground: 224 71% 8%;
 
-    --primary: 248 93% 70%; /* #7c6cfa violet */
+    --primary: 248 80% 58%;          /* violet — slightly deeper for light bg */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 340 90% 70%; /* #fa6c9f pink accent */
+    --secondary: 340 80% 62%;        /* pink accent */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 14% 92%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 248 80% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 52%;        /* red, darker for contrast */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 55% 40%;          /* green, darker for contrast */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 80% 42%;           /* amber, darker for contrast */
+    --warning-foreground: 0 0% 100%;
+
+    --border: 220 14% 86%;
+    --input: 220 14% 92%;
+    --ring: 248 80% 58%;
+
+    --radius: 1rem;
+  }
+
+  /* ── Dark theme ── */
+  .dark {
+    --background: 240 10% 4%;        /* #0a0a0f */
+    --foreground: 240 20% 97%;       /* #f0f0ff */
+
+    --card: 240 12% 8%;              /* #13131a */
+    --card-foreground: 240 20% 97%;
+
+    --popover: 240 14% 10%;          /* #1c1c27 */
+    --popover-foreground: 240 20% 97%;
+
+    --primary: 248 93% 70%;          /* #7c6cfa violet */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 340 90% 70%;        /* #fa6c9f pink accent */
     --secondary-foreground: 0 0% 100%;
 
     --muted: 240 12% 12%;
@@ -26,20 +65,18 @@
     --accent: 248 93% 70%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 71%; /* #f87171 red */
+    --destructive: 0 72% 71%;        /* #f87171 red */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 69% 58%; /* #4ade80 green */
+    --success: 142 69% 58%;          /* #4ade80 green */
     --success-foreground: 0 0% 10%;
 
-    --warning: 38 92% 50%; /* #fbbf24 amber */
+    --warning: 38 92% 50%;           /* #fbbf24 amber */
     --warning-foreground: 0 0% 10%;
 
-    --border: 248 60% 20%; /* violet tinted border */
+    --border: 248 60% 20%;           /* violet tinted border */
     --input: 240 12% 12%;
     --ring: 248 93% 70%;
-
-    --radius: 1rem;
   }
 }
 
@@ -47,10 +84,22 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Smooth theme transition */
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+
+  /* Suppress transitions on animation properties to avoid jank */
+  .animate-ping, .animate-spin, .animate-pulse, .animate-fade-in, .animate-slide-in {
+    transition: none !important;
   }
 
   /* Custom scrollbar */

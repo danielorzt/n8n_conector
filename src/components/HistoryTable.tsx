@@ -6,6 +6,7 @@ import {
   Clock
 } from 'lucide-react'
 import { cn, formatCOP, formatDate, formatTime } from '@/lib/utils'
+import { useApp } from '@/contexts/AppContext'
 import type { Simulation } from '@/types'
 
 interface HistoryTableProps {
@@ -14,15 +15,17 @@ interface HistoryTableProps {
 }
 
 export const HistoryTable = memo(function HistoryTable({ simulations, onRetry }: HistoryTableProps) {
+  const { t } = useApp()
+
   if (simulations.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-card p-12 text-center">
         <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
           <Clock className="size-8 text-muted-foreground opacity-50" />
         </div>
-        <p className="font-display font-semibold text-foreground/80">Sin transacciones</p>
+        <p className="font-display font-semibold text-foreground/80">{t.noTransactions}</p>
         <p className="text-sm text-muted-foreground/60 mt-1">
-          Las simulaciones de compra apareceran aqui
+          {t.transactionsWillAppear}
         </p>
       </div>
     )
@@ -34,36 +37,18 @@ export const HistoryTable = memo(function HistoryTable({ simulations, onRetry }:
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Estado
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Fecha/Hora
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Cliente
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Producto
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Cantidad
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Total
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Acciones
-              </th>
+              {[t.status, t.dateTime, t.customer, t.product, t.quantity, t.total, t.actions].map(col => (
+                <th key={col} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  {col}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {simulations.slice(0, 10).map((sim, index) => (
-              <tr 
-                key={sim.id} 
-                className={cn(
-                  "transition-colors hover:bg-muted/20 animate-fade-in",
-                )}
+              <tr
+                key={sim.id}
+                className="transition-colors hover:bg-muted/20 animate-fade-in"
                 style={{ animationDelay: `${index * 30}ms` }}
               >
                 <td className="px-4 py-3">
@@ -76,7 +61,11 @@ export const HistoryTable = memo(function HistoryTable({ simulations, onRetry }:
                     {sim.estado_envio === 'enviado' && <CheckCircle className="size-3" />}
                     {sim.estado_envio === 'error' && <XCircle className="size-3" />}
                     {sim.estado_envio === 'pendiente' && <Clock className="size-3 animate-pulse" />}
-                    <span className="capitalize">{sim.estado_envio}</span>
+                    <span className="capitalize">
+                      {sim.estado_envio === 'enviado' ? t.sent
+                        : sim.estado_envio === 'error' ? t.error
+                        : t.pending}
+                    </span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
@@ -100,7 +89,7 @@ export const HistoryTable = memo(function HistoryTable({ simulations, onRetry }:
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-sm font-medium">{sim.cantidad} uds</span>
+                  <span className="text-sm font-medium">{sim.cantidad} {t.units}</span>
                 </td>
                 <td className="px-4 py-3">
                   <span className="text-sm font-bold text-primary">{formatCOP(sim.total)}</span>
@@ -112,19 +101,19 @@ export const HistoryTable = memo(function HistoryTable({ simulations, onRetry }:
                       className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     >
                       <RefreshCw className="size-3" />
-                      Reintentar
+                      {t.retry}
                     </button>
                   )}
                   {sim.estado_envio === 'enviado' && (
                     <div className="flex items-center gap-1 text-xs text-success">
                       <CheckCircle className="size-3" />
-                      Sincronizado
+                      {t.synced}
                     </div>
                   )}
                   {sim.estado_envio === 'pendiente' && (
                     <div className="flex items-center gap-1 text-xs text-warning">
                       <Clock className="size-3 animate-pulse" />
-                      Procesando
+                      {t.processing}
                     </div>
                   )}
                 </td>
@@ -133,11 +122,11 @@ export const HistoryTable = memo(function HistoryTable({ simulations, onRetry }:
           </tbody>
         </table>
       </div>
-      
+
       {simulations.length > 10 && (
         <div className="border-t border-border px-4 py-3 text-center">
           <p className="text-sm text-muted-foreground">
-            Mostrando 10 de {simulations.length} transacciones
+            {t.showingOf(10, simulations.length)}
           </p>
         </div>
       )}

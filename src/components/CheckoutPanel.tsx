@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { 
-  Minus, 
-  Plus, 
-  Send, 
+import {
+  Minus,
+  Plus,
+  Send,
   AlertTriangle,
   Loader2,
   CheckCircle,
   X
 } from 'lucide-react'
-import { cn, formatCOP, getStockStatus, getStockLabel } from '@/lib/utils'
+import { cn, formatCOP, getStockStatus } from '@/lib/utils'
+import { useApp } from '@/contexts/AppContext'
 import type { Product, CustomerData } from '@/types'
 
 interface CheckoutPanelProps {
@@ -27,6 +28,7 @@ const defaultCustomer: CustomerData = {
 }
 
 export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: CheckoutPanelProps) {
+  const { t } = useApp()
   const [quantity, setQuantity] = useState(1)
   const [customer, setCustomer] = useState<CustomerData>(defaultCustomer)
   const [submitted, setSubmitted] = useState(false)
@@ -35,7 +37,8 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
 
   const stockPostVenta = product.stock_actual - quantity
   const stockStatus = getStockStatus(stockPostVenta, product.stock_minimo)
-  const stockLabel = getStockLabel(stockStatus)
+  const stockLabels = { critical: t.stockCritical, low: t.stockLow, ok: t.stockOK }
+  const stockLabel = stockLabels[stockStatus]
   const total = product.precio * quantity
 
   const handleQuantityChange = (delta: number) => {
@@ -63,7 +66,7 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
     <div className="rounded-2xl border border-border bg-card p-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="font-display text-lg font-bold">Procesar Orden</h2>
+        <h2 className="font-display text-lg font-bold">{t.processOrder}</h2>
         <button
           onClick={onClose}
           className="size-8 rounded-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -76,12 +79,12 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
         {/* Customer Data */}
         <div className="space-y-4 mb-6">
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-            Datos del Cliente
+            {t.customerData}
           </h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label htmlFor="nombre" className="block text-xs text-muted-foreground mb-1.5">
-                Nombre
+                {t.name}
               </label>
               <input
                 id="nombre"
@@ -94,7 +97,7 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
             </div>
             <div>
               <label htmlFor="empresa" className="block text-xs text-muted-foreground mb-1.5">
-                Empresa
+                {t.company}
               </label>
               <input
                 id="empresa"
@@ -107,7 +110,7 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
             </div>
             <div>
               <label htmlFor="email" className="block text-xs text-muted-foreground mb-1.5">
-                Correo Electronico
+                {t.email}
               </label>
               <input
                 id="email"
@@ -120,7 +123,7 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
             </div>
             <div>
               <label htmlFor="cargo" className="block text-xs text-muted-foreground mb-1.5">
-                Cargo
+                {t.position}
               </label>
               <input
                 id="cargo"
@@ -136,7 +139,7 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
 
         {/* Quantity Control */}
         <div className="flex items-center gap-4 mb-6">
-          <span className="text-sm text-muted-foreground">Cantidad:</span>
+          <span className="text-sm text-muted-foreground">{t.quantity}:</span>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -161,33 +164,33 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
         {/* Order Summary */}
         <div className="rounded-xl bg-popover p-4 mb-6 space-y-3">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Producto</span>
+            <span className="text-muted-foreground">{t.product}</span>
             <span className="font-medium truncate ml-4">{product.nombre}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Codigo</span>
+            <span className="text-muted-foreground">{t.code}</span>
             <span className="font-mono">{product.codigo}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Precio unitario</span>
+            <span className="text-muted-foreground">{t.unitPrice}</span>
             <span>{formatCOP(product.precio)}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Cantidad</span>
-            <span>{quantity} unidades</span>
+            <span className="text-muted-foreground">{t.quantity}</span>
+            <span>{quantity} {t.units}</span>
           </div>
           <div className="border-t border-border pt-3 flex justify-between">
-            <span className="font-medium">Total</span>
+            <span className="font-medium">{t.total}</span>
             <span className="font-bold text-lg text-primary">{formatCOP(total)}</span>
           </div>
           <div className="flex justify-between items-center text-sm pt-2">
-            <span className="text-muted-foreground">Stock posterior</span>
+            <span className="text-muted-foreground">{t.postSaleStock}</span>
             <span className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
               statusColors[stockStatus]
             )}>
               {stockStatus === 'critical' && <AlertTriangle className="size-3" />}
-              {stockLabel} ({stockPostVenta} restantes)
+              {stockLabel} ({stockPostVenta} {t.remaining})
             </span>
           </div>
         </div>
@@ -199,8 +202,8 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
           className={cn(
             "w-full rounded-xl py-4 text-base font-display font-bold transition-all",
             "flex items-center justify-center gap-2",
-            submitted 
-              ? "bg-success text-success-foreground" 
+            submitted
+              ? "bg-success text-success-foreground"
               : "gradient-primary text-primary-foreground hover:opacity-90",
             "disabled:opacity-70 disabled:cursor-not-allowed"
           )}
@@ -208,17 +211,17 @@ export function CheckoutPanel({ product, onClose, onSubmit, isProcessing }: Chec
           {isProcessing ? (
             <>
               <Loader2 className="size-5 animate-spin" />
-              <span>Procesando transaccion...</span>
+              <span>{t.processingTransaction}</span>
             </>
           ) : submitted ? (
             <>
               <CheckCircle className="size-5" />
-              <span>Orden enviada exitosamente</span>
+              <span>{t.orderSentSuccess}</span>
             </>
           ) : (
             <>
               <Send className="size-5" />
-              <span>Ejecutar transaccion y sincronizar</span>
+              <span>{t.executeTransaction}</span>
             </>
           )}
         </button>

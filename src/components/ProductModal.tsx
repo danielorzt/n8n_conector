@@ -1,41 +1,24 @@
 import { useState, useEffect } from 'react'
-import { 
-  X, 
+import {
+  X,
   Plus,
   Pencil,
   Trash2,
   Search,
-  Monitor, 
-  Laptop, 
-  Printer, 
-  Keyboard, 
-  Camera, 
+  Monitor,
+  Laptop,
+  Printer,
+  Keyboard,
+  Camera,
   Headphones,
   Package,
   Loader2
 } from 'lucide-react'
 import { cn, formatCOP } from '@/lib/utils'
+import { useApp } from '@/contexts/AppContext'
 import type { Product } from '@/types'
 
-const iconOptions = [
-  { value: 'Monitor', label: 'Monitor', icon: Monitor },
-  { value: 'Laptop', label: 'Laptop', icon: Laptop },
-  { value: 'Printer', label: 'Impresora', icon: Printer },
-  { value: 'Keyboard', label: 'Teclado', icon: Keyboard },
-  { value: 'Camera', label: 'Camara', icon: Camera },
-  { value: 'Headphones', label: 'Audifonos', icon: Headphones },
-  { value: 'Package', label: 'Otro', icon: Package },
-]
-
-const categorias = [
-  'Monitores',
-  'Laptops',
-  'Impresoras',
-  'Perifericos',
-  'Camaras',
-  'Audio',
-  'Accesorios',
-]
+const iconComponents = { Monitor, Laptop, Printer, Keyboard, Camera, Headphones, Package }
 
 interface ProductModalProps {
   isOpen: boolean
@@ -44,16 +27,27 @@ interface ProductModalProps {
   onAdd: (product: Omit<Product, 'id' | 'created_at'>) => Promise<Product>
   onEdit: (id: string, updates: Partial<Product>) => Promise<void>
   onDelete: (id: string) => Promise<void>
+  /** Pre-select a product for immediate editing */
+  initialEditProduct?: Product | null
 }
 
-export function ProductModal({ 
-  isOpen, 
-  onClose, 
-  products, 
-  onAdd, 
-  onEdit, 
-  onDelete 
+export function ProductModal({
+  isOpen,
+  onClose,
+  products,
+  onAdd,
+  onEdit,
+  onDelete,
+  initialEditProduct,
 }: ProductModalProps) {
+  const { t } = useApp()
+
+  const iconOptions = Object.entries(iconComponents).map(([value, icon]) => ({
+    value,
+    label: t.iconNames[value as keyof typeof t.iconNames] || value,
+    icon,
+  }))
+
   const [view, setView] = useState<'list' | 'form'>('list')
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -63,7 +57,7 @@ export function ProductModal({
   const [formData, setFormData] = useState({
     codigo: '',
     nombre: '',
-    categoria: 'Monitores',
+    categoria: t.categorias[0],
     precio: 0,
     stock_actual: 0,
     stock_minimo: 5,
@@ -71,6 +65,18 @@ export function ProductModal({
     score_ia: 8,
     icono: 'Package',
   })
+
+  // Handle pre-selected product for editing
+  useEffect(() => {
+    if (isOpen && initialEditProduct) {
+      setEditingProduct(initialEditProduct)
+      setView('form')
+    } else if (!isOpen) {
+      setView('list')
+      setEditingProduct(null)
+      setSearchQuery('')
+    }
+  }, [isOpen, initialEditProduct])
 
   useEffect(() => {
     if (editingProduct) {
@@ -89,7 +95,7 @@ export function ProductModal({
       setFormData({
         codigo: '',
         nombre: '',
-        categoria: 'Monitores',
+        categoria: t.categorias[0],
         precio: 0,
         stock_actual: 0,
         stock_minimo: 5,
@@ -98,7 +104,7 @@ export function ProductModal({
         icono: 'Package',
       })
     }
-  }, [editingProduct])
+  }, [editingProduct, t.categorias])
 
   const filteredProducts = products.filter(p =>
     p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -108,7 +114,6 @@ export function ProductModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-
     try {
       if (editingProduct) {
         await onEdit(editingProduct.id, formData)
@@ -132,7 +137,7 @@ export function ProductModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-background/80 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -141,21 +146,18 @@ export function ProductModal({
       <div className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-fade-in mx-4">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4">
-          <div className="flex items-center gap-3">
-            <h2 className="font-display text-xl font-bold">
-              {view === 'list' ? 'Administrar Catalogo' : editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-            </h2>
-          </div>
+          <h2 className="font-display text-xl font-bold">
+            {view === 'list'
+              ? t.manageCatalogTitle
+              : editingProduct ? t.editProduct : t.newProduct}
+          </h2>
           <div className="flex items-center gap-2">
             {view === 'form' && (
               <button
-                onClick={() => {
-                  setView('list')
-                  setEditingProduct(null)
-                }}
+                onClick={() => { setView('list'); setEditingProduct(null) }}
                 className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
-                Cancelar
+                {t.cancel}
               </button>
             )}
             <button
@@ -179,19 +181,16 @@ export function ProductModal({
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar productos..."
+                    placeholder={t.searchProducts}
                     className="w-full rounded-lg border border-border bg-popover pl-10 pr-4 py-2 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
                 <button
-                  onClick={() => {
-                    setEditingProduct(null)
-                    setView('form')
-                  }}
-                  className="flex items-center gap-2 rounded-lg gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                  onClick={() => { setEditingProduct(null); setView('form') }}
+                  className="flex items-center gap-2 rounded-lg gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 whitespace-nowrap"
                 >
                   <Plus className="size-4" />
-                  <span>Agregar</span>
+                  <span>{t.add}</span>
                 </button>
               </div>
 
@@ -200,11 +199,11 @@ export function ProductModal({
                 {filteredProducts.length === 0 ? (
                   <div className="py-12 text-center text-muted-foreground">
                     <Package className="size-12 mx-auto mb-3 opacity-50" />
-                    <p>No se encontraron productos</p>
+                    <p>{t.noProductsFound}</p>
                   </div>
                 ) : (
                   filteredProducts.map(product => {
-                    const IconComponent = iconOptions.find(i => i.value === product.icono)?.icon || Package
+                    const IconComponent = iconComponents[product.icono as keyof typeof iconComponents] || Package
                     return (
                       <div
                         key={product.id}
@@ -217,34 +216,31 @@ export function ProductModal({
                           <div>
                             <p className="font-medium">{product.nombre}</p>
                             <p className="text-sm text-muted-foreground">
-                              {product.codigo} · {formatCOP(product.precio)} · Stock: {product.stock_actual}
+                              {product.codigo} · {formatCOP(product.precio)} · {t.stockLabel} {product.stock_actual}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           {deleteConfirm === product.id ? (
                             <>
-                              <span className="text-sm text-muted-foreground mr-2">Confirmar eliminacion?</span>
+                              <span className="text-sm text-muted-foreground mr-2">{t.confirmDelete}</span>
                               <button
                                 onClick={() => handleDelete(product.id)}
                                 className="rounded-lg bg-destructive/10 px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/20 transition-colors"
                               >
-                                Eliminar
+                                {t.delete}
                               </button>
                               <button
                                 onClick={() => setDeleteConfirm(null)}
                                 className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                               >
-                                Cancelar
+                                {t.cancel}
                               </button>
                             </>
                           ) : (
                             <>
                               <button
-                                onClick={() => {
-                                  setEditingProduct(product)
-                                  setView('form')
-                                }}
+                                onClick={() => { setEditingProduct(product); setView('form') }}
                                 className="size-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                               >
                                 <Pencil className="size-4" />
@@ -268,7 +264,7 @@ export function ProductModal({
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Codigo</label>
+                  <label className="block text-sm font-medium mb-1.5">{t.codeLabel}</label>
                   <input
                     type="text"
                     value={formData.codigo}
@@ -279,7 +275,7 @@ export function ProductModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Nombre</label>
+                  <label className="block text-sm font-medium mb-1.5">{t.nameLabel}</label>
                   <input
                     type="text"
                     value={formData.nombre}
@@ -290,19 +286,19 @@ export function ProductModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Categoria</label>
+                  <label className="block text-sm font-medium mb-1.5">{t.category}</label>
                   <select
                     value={formData.categoria}
                     onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
                     className="w-full rounded-lg border border-border bg-popover px-3 py-2 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
                   >
-                    {categorias.map(cat => (
+                    {t.categorias.map((cat: string) => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Icono</label>
+                  <label className="block text-sm font-medium mb-1.5">{t.icon}</label>
                   <select
                     value={formData.icono}
                     onChange={(e) => setFormData({ ...formData, icono: e.target.value })}
@@ -314,7 +310,7 @@ export function ProductModal({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Precio (COP)</label>
+                  <label className="block text-sm font-medium mb-1.5">{t.price}</label>
                   <input
                     type="number"
                     value={formData.precio}
@@ -326,18 +322,18 @@ export function ProductModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Proveedor</label>
+                  <label className="block text-sm font-medium mb-1.5">{t.supplier}</label>
                   <input
                     type="text"
                     value={formData.proveedor}
                     onChange={(e) => setFormData({ ...formData, proveedor: e.target.value })}
-                    placeholder="ImportTech Bogota"
+                    placeholder="ImportTech Bogotá"
                     className="w-full rounded-lg border border-border bg-popover px-3 py-2 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Stock Actual</label>
+                  <label className="block text-sm font-medium mb-1.5">{t.currentStock}</label>
                   <input
                     type="number"
                     value={formData.stock_actual}
@@ -348,7 +344,7 @@ export function ProductModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Stock Minimo</label>
+                  <label className="block text-sm font-medium mb-1.5">{t.minStock}</label>
                   <input
                     type="number"
                     value={formData.stock_minimo}
@@ -359,7 +355,7 @@ export function ProductModal({
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium mb-1.5">Score IA (1-10)</label>
+                  <label className="block text-sm font-medium mb-1.5">{t.scoreIA}</label>
                   <input
                     type="range"
                     value={formData.score_ia}
@@ -378,10 +374,10 @@ export function ProductModal({
 
               {/* Preview */}
               <div className="rounded-xl border border-border bg-popover p-4">
-                <p className="text-xs text-muted-foreground mb-2">Vista previa</p>
+                <p className="text-xs text-muted-foreground mb-2">{t.preview}</p>
                 <div className="flex items-center gap-3">
                   {(() => {
-                    const IconComponent = iconOptions.find(i => i.value === formData.icono)?.icon || Package
+                    const IconComponent = iconComponents[formData.icono as keyof typeof iconComponents] || Package
                     return (
                       <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
                         <IconComponent className="size-5 text-primary" />
@@ -389,7 +385,7 @@ export function ProductModal({
                     )
                   })()}
                   <div>
-                    <p className="font-medium">{formData.nombre || 'Nombre del producto'}</p>
+                    <p className="font-medium">{formData.nombre || t.nameLabel}</p>
                     <p className="text-sm text-muted-foreground">
                       {formData.codigo || 'COD-XXX'} · {formatCOP(formData.precio)}
                     </p>
@@ -410,10 +406,10 @@ export function ProductModal({
                 {isSubmitting ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    <span>Guardando...</span>
+                    <span>{t.saving}</span>
                   </>
                 ) : (
-                  <span>{editingProduct ? 'Guardar cambios' : 'Crear producto'}</span>
+                  <span>{editingProduct ? t.saveChanges : t.createProduct}</span>
                 )}
               </button>
             </form>

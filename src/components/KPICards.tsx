@@ -7,6 +7,7 @@ import {
   ArrowUpRight
 } from 'lucide-react'
 import { cn, formatCOP, formatTime } from '@/lib/utils'
+import { useApp } from '@/contexts/AppContext'
 import type { KPIData } from '@/types'
 
 interface KPICardsProps {
@@ -24,9 +25,7 @@ function AnimatedCounter({ value, duration = 1000 }: { value: number; duration?:
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime
       const progress = Math.min((currentTime - startTime) / duration, 1)
-      
       setDisplayValue(Math.floor(progress * value))
-      
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate)
       }
@@ -116,10 +115,12 @@ function KPICard({
 }
 
 export function KPICards({ kpis, isLoading }: KPICardsProps) {
+  const { t } = useApp()
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <KPICard
-        title="Transacciones Hoy"
+        title={t.todayTransactions}
         value={kpis.ventasHoy}
         icon={TrendingUp}
         trend="+12%"
@@ -127,14 +128,14 @@ export function KPICards({ kpis, isLoading }: KPICardsProps) {
         isLoading={isLoading}
       />
       <KPICard
-        title="Productos en Stock Critico"
+        title={t.criticalStock}
         value={kpis.productosStockCritico}
         icon={AlertTriangle}
         color="destructive"
         isLoading={isLoading}
       />
       <KPICard
-        title="Valor Total Movido"
+        title={t.totalValueMoved}
         value={kpis.valorTotalMovido}
         icon={DollarSign}
         color="success"
@@ -142,8 +143,8 @@ export function KPICards({ kpis, isLoading }: KPICardsProps) {
         isCurrency
       />
       <KPICard
-        title="Ultima Sincronizacion"
-        value={kpis.ultimaSincronizacion ? formatTime(kpis.ultimaSincronizacion) : 'Sin datos'}
+        title={t.lastSync}
+        value={kpis.ultimaSincronizacion ? formatTime(kpis.ultimaSincronizacion) : t.noData}
         icon={Clock}
         color="warning"
         isLoading={isLoading}
