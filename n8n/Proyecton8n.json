@@ -182,12 +182,12 @@
           },
           "conditions": [
             {
-              "id": "cond-compro",
-              "leftValue": "={{ $json.Estado_Venta }}",
-              "rightValue": "Compró",
+              "id": "cond-stock-critico",
+              "leftValue": "={{ $json.Stock_Actual }}",
+              "rightValue": 4,
               "operator": {
-                "type": "string",
-                "operation": "equals"
+                "type": "number",
+                "operation": "lte"
               }
             }
           ],
@@ -196,7 +196,7 @@
         "options": {}
       },
       "id": "b4d30b85-d6a6-4b88-ac70-e22a8c008dc0",
-      "name": "🎯 ¿Es una venta real?",
+      "name": "🎯 ¿Stock Crítico?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
@@ -207,11 +207,11 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { status: 'ignored', motivo: 'Estado_Venta no es Compró — descartado' } }}",
+        "responseBody": "={{ { status: 'ok', mensaje: 'Venta registrada — stock normal sin alerta critica', stock_post_venta: $json.Stock_Actual } }}",
         "options": {}
       },
       "id": "respond-ignored-001",
-      "name": "🔁 Respond: Sin acción",
+      "name": "🔁 Respond: Venta Normal",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
@@ -221,7 +221,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const lead = $input.first().json;\n\nconst stockActual = lead.Stock_Actual || 0;\nconst stockMinimo = lead.Stock_Minimo || 0;\nconst proveedor = lead.Proveedor || 'Sin proveedor';\nconst producto = lead.Producto_Comprado || 'Sin producto';\nconst codigo = lead.Codigo || 'N/A';\nconst cantidad = lead.Cantidad || 1;\nconst total = lead.Total || 0;\n\nconst stockBajo = stockActual < stockMinimo;\nconst stockUrgente = stockActual < 5;\nconst estadoStock = stockUrgente ? '🔴 CRÍTICO' : (stockBajo ? '🟡 BAJO' : '🟢 OK');\n\nconst fechaHora = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });\nconst fecha = new Date().toLocaleDateString('es-CO');\nconst hora = new Date().toLocaleTimeString('es-CO');\n\nconst sep = '───────────────────────';\n\nconst msgCritico = [\n  '🚨 *ALERTA — Stock Crítico + Venta Premium*',\n  sep,\n  `👤 *Cliente:* ${lead.nombre || 'Sin nombre'}`,\n  `🏢 *Empresa:* ${lead.empresa || 'Sin empresa'}`,\n  `💼 *Cargo:* ${lead.cargo || 'Sin cargo'}`,\n  `📧 *Email:* ${lead.email || 'Sin email'}`,\n  `⭐ *Score IA:* ${lead.Score_IA || 0}/10`,\n  '',\n  `📦 *Producto:* ${producto}`,\n  `🔢 *Cantidad vendida:* ${cantidad} unidad(es)`,\n  `💰 *Total venta:* $${Math.round(total).toLocaleString('es-CO')}`,\n  `📍 *Código:* ${codigo}`,\n  '',\n  '📊 *Estado del inventario:*',\n  `• Stock tras venta: ${stockActual} uds`,\n  `• Stock mínimo: ${stockMinimo} uds`,\n  `• Estado: ${estadoStock}`,\n  '',\n  `🏭 *Proveedor:* ${proveedor}`,\n  `🕐 *Fecha:* ${fecha} — ${hora}`,\n  sep,\n  '⚠️ _Se generará orden de recompra automáticamente_'\n].join('\\n');\n\nconst msgOk = [\n  '✅ *Venta Premium Convertida*',\n  sep,\n  `👤 *Cliente:* ${lead.nombre || 'Sin nombre'}`,\n  `🏢 *Empresa:* ${lead.empresa || 'Sin empresa'}`,\n  `💼 *Cargo:* ${lead.cargo || 'Sin cargo'}`,\n  `📧 *Email:* ${lead.email || 'Sin email'}`,\n  `⭐ *Score IA:* ${lead.Score_IA || 0}/10`,\n  '',\n  `📦 *Producto:* ${producto}`,\n  `🔢 *Cantidad vendida:* ${cantidad} unidad(es)`,\n  `💰 *Total venta:* $${Math.round(total).toLocaleString('es-CO')}`,\n  `📍 *Código:* ${codigo}`,\n  '',\n  '📊 *Estado del inventario:*',\n  `• Stock tras venta: ${stockActual} uds`,\n  `• Stock mínimo: ${stockMinimo} uds`,\n  `• Estado: ${estadoStock}`,\n  '',\n  `🏭 *Proveedor:* ${proveedor}`,\n  `🕐 *Fecha:* ${fecha} — ${hora}`,\n  sep,\n  '✅ _Stock en rango normal. No se requiere reabastecimiento._'\n].join('\\n');\n\nreturn [{\n  json: {\n    leadNombre: lead.nombre || 'Sin nombre',\n    leadEmpresa: lead.empresa || 'Sin empresa',\n    leadEmail: lead.email || '',\n    leadCargo: lead.cargo || '',\n    leadScore: lead.Score_IA || 0,\n    producto,\n    codigo,\n    proveedor,\n    stockActual,\n    stockMinimo,\n    cantidad,\n    total,\n    stockBajo,\n    stockUrgente,\n    estadoStock,\n    generarOrden: stockBajo,\n    mensajeSlack: stockBajo ? msgCritico : msgOk,\n    mensajeFinal: stockBajo ? msgCritico : msgOk,\n    fechaHora,\n    fecha,\n    hora\n  }\n}];"
+        "jsCode": "const lead = $input.first().json;\n\nconst stockActual = lead.Stock_Actual || 0;\nconst stockMinimo = lead.Stock_Minimo || 0;\nconst proveedor = lead.Proveedor || 'Sin proveedor';\nconst producto = lead.Producto_Comprado || 'Sin producto';\nconst codigo = lead.Codigo || 'N/A';\nconst cantidad = lead.Cantidad || 1;\nconst total = lead.Total || 0;\n\nconst stockBajo = stockActual < stockMinimo;\nconst stockUrgente = stockActual < 5;\nconst estadoStock = stockUrgente ? '🔴 CRÍTICO' : (stockBajo ? '🟡 BAJO' : '🟢 OK');\n\nconst fechaHora = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });\nconst fecha = new Date().toLocaleDateString('es-CO');\nconst hora = new Date().toLocaleTimeString('es-CO');\n\nconst sep = '───────────────────────';\n\nconst msgCritico = [\n  '🚨 *ALERTA — Stock Crítico + Venta Premium*',\n  sep,\n  `👤 *Cliente:* ${lead.nombre || 'Sin nombre'}`,\n  `🏢 *Empresa:* ${lead.empresa || 'Sin empresa'}`,\n  `💼 *Cargo:* ${lead.cargo || 'Sin cargo'}`,\n  `📧 *Email:* ${lead.email || 'Sin email'}`,\n  `⭐ *Score IA:* ${lead.Score_IA || 0}/10`,\n  '',\n  `📦 *Producto:* ${producto}`,\n  `🔢 *Cantidad vendida:* ${cantidad} unidad(es)`,\n  `💰 *Total venta:* $${Math.round(total).toLocaleString('es-CO')}`,\n  `📍 *Código:* ${codigo}`,\n  '',\n  '📊 *Estado del inventario:*',\n  `• Stock tras venta: ${stockActual} uds`,\n  `• Stock mínimo: ${stockMinimo} uds`,\n  `• Estado: ${estadoStock}`,\n  '',\n  `🏭 *Proveedor:* ${proveedor}`,\n  `🕐 *Fecha:* ${fecha} — ${hora}`,\n  sep,\n  '⚠️ _Se generará orden de recompra automáticamente_'\n].join('\\n');\n\nconst msgOk = [\n  '✅ *Venta Premium Convertida*',\n  sep,\n  `👤 *Cliente:* ${lead.nombre || 'Sin nombre'}`,\n  `🏢 *Empresa:* ${lead.empresa || 'Sin empresa'}`,\n  `💼 *Cargo:* ${lead.cargo || 'Sin cargo'}`,\n  `📧 *Email:* ${lead.email || 'Sin email'}`,\n  `⭐ *Score IA:* ${lead.Score_IA || 0}/10`,\n  '',\n  `📦 *Producto:* ${producto}`,\n  `🔢 *Cantidad vendida:* ${cantidad} unidad(es)`,\n  `💰 *Total venta:* $${Math.round(total).toLocaleString('es-CO')}`,\n  `📍 *Código:* ${codigo}`,\n  '',\n  '📊 *Estado del inventario:*',\n  `• Stock tras venta: ${stockActual} uds`,\n  `• Stock mínimo: ${stockMinimo} uds`,\n  `• Estado: ${estadoStock}`,\n  '',\n  `🏭 *Proveedor:* ${proveedor}`,\n  `🕐 *Fecha:* ${fecha} — ${hora}`,\n  sep,\n  '✅ _Stock en rango normal. No se requiere reabastecimiento._'\n].join('\\n');\n\nreturn [{\n  json: {\n    leadNombre: lead.nombre || 'Sin nombre',\n    leadEmpresa: lead.empresa || 'Sin empresa',\n    leadEmail: lead.email || '',\n    leadCargo: lead.cargo || '',\n    leadScore: lead.Score_IA || 0,\n    producto,\n    codigo,\n    proveedor,\n    stockActual,\n    stockMinimo,\n    cantidad,\n    total,\n    stockBajo,\n    stockUrgente,\n    estadoStock,\n    generarOrden: stockUrgente || stockBajo,\n    mensajeSlack: (stockUrgente || stockBajo) ? msgCritico : msgOk,\n    mensajeFinal: (stockUrgente || stockBajo) ? msgCritico : msgOk,\n    fechaHora,\n    fecha,\n    hora\n  }\n}];"
       },
       "id": "626fbaca-6127-41f0-9023-06b1d33e7310",
       "name": "⚙️ Cruzar Lead + Inventario",
@@ -266,11 +266,11 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { status: 'ok', orden_generada: true, producto: $json.producto, stock_post_venta: $json.stockActual, alerta: $json.estadoStock, mensaje: 'Orden de recompra generada — revisa Slack' } }}",
+        "responseBody": "={{ { status: 'alerta', alerta: $json.estadoStock, orden_generada: $json.generarOrden, producto: $json.producto, stock_post_venta: $json.stockActual, mensaje: 'Alerta critica — Slack + Gemini enviado' } }}",
         "options": {}
       },
       "id": "respond-critico-001",
-      "name": "🔁 Respond: Orden Generada",
+      "name": "🔁 Respond: Alerta Crítica",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
@@ -692,6 +692,117 @@
           "name": "Google Sheets "
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1mqKIJnD6fNjPokLzC-82BG4ufo0zgMpxEvsowmOWq9M",
+          "mode": "list",
+          "cachedResultName": "NovaSync"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 544319994,
+          "mode": "list",
+          "cachedResultName": "Inventario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mqKIJnD6fNjPokLzC-82BG4ufo0zgMpxEvsowmOWq9M/edit#gid=544319994"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Código": "={{ $json.Codigo }}",
+            "Stock Actual": "={{ $json.Stock_Actual }}"
+          },
+          "matchingColumns": [
+            "Código"
+          ],
+          "schema": [
+            {
+              "id": "Código",
+              "displayName": "Código",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Stock Actual",
+              "displayName": "Stock Actual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sheets-normal-001",
+      "name": "🔄 Sheets — Venta Normal",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -100,
+        900
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FTpPj23iveMrq8Uw",
+          "name": "Google Sheets "
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://lpvqyjelnzwaesohiwwk.supabase.co/rest/v1/products?codigo=eq.{{ $json.Codigo }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwdnF5amVsbnp3YWVzb2hpd3drIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MDE2NzcsImV4cCI6MjA5NTM3NzY3N30.BhmBqgnbczJsVY8WoYq7pY3DVoTL297NB_PepjaclYA"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwdnF5amVsbnp3YWVzb2hpd3drIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MDE2NzcsImV4cCI6MjA5NTM3NzY3N30.BhmBqgnbczJsVY8WoYq7pY3DVoTL297NB_PepjaclYA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ stock_actual: $json.Stock_Actual }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "supabase-update-001",
+      "name": "🌐 Actualizar Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        1040
+      ]
     }
   ],
   "pinData": {},
@@ -711,7 +822,7 @@
       "main": [
         [
           {
-            "node": "🎯 ¿Es una venta real?",
+            "node": "🎯 ¿Stock Crítico?",
             "type": "main",
             "index": 0
           }
@@ -722,7 +833,7 @@
       "main": [
         [
           {
-            "node": "⚠️ ¿Generar Orden?",
+            "node": "⚙️ Preparar Prompt Alerta",
             "type": "main",
             "index": 0
           },
@@ -733,6 +844,11 @@
           },
           {
             "node": "📊 Registrar en Ops_Alertas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔁 Respond: Alerta Crítica",
             "type": "main",
             "index": 0
           }
@@ -810,7 +926,7 @@
         []
       ]
     },
-    "🎯 ¿Es una venta real?": {
+    "🎯 ¿Stock Crítico?": {
       "main": [
         [
           {
@@ -821,7 +937,17 @@
         ],
         [
           {
-            "node": "🔁 Respond: Sin acción",
+            "node": "🔄 Sheets — Venta Normal",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🌐 Actualizar Supabase",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔁 Respond: Venta Normal",
             "type": "main",
             "index": 0
           }
