@@ -12,7 +12,10 @@
       "name": "📝 Instrucciones",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-1080, 500]
+      "position": [
+        -1080,
+        500
+      ]
     },
     {
       "parameters": {
@@ -25,7 +28,10 @@
       "name": "📊 Estructura Sheets",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-1080, 880]
+      "position": [
+        -1080,
+        880
+      ]
     },
     {
       "parameters": {
@@ -38,7 +44,10 @@
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-760, 700],
+      "position": [
+        -760,
+        700
+      ],
       "webhookId": "e263a234-ab7d-4dec-a196-544edb38b3cc"
     },
     {
@@ -47,23 +56,108 @@
         "duplicateItem": false,
         "assignments": {
           "assignments": [
-            {"id": "a1", "name": "nombre", "value": "={{ $json.body.nombre || '' }}", "type": "string"},
-            {"id": "a2", "name": "empresa", "value": "={{ $json.body.empresa || '' }}", "type": "string"},
-            {"id": "a3", "name": "email", "value": "={{ $json.body.email || '' }}", "type": "string"},
-            {"id": "a4", "name": "cargo", "value": "={{ $json.body.cargo || '' }}", "type": "string"},
-            {"id": "a5", "name": "Score_IA", "value": "={{ $json.body.Score_IA || 0 }}", "type": "number"},
-            {"id": "a6", "name": "Estado_Venta", "value": "={{ $json.body.Estado_Venta || '' }}", "type": "string"},
-            {"id": "a7", "name": "Producto_Comprado", "value": "={{ $json.body.Producto_Comprado || '' }}", "type": "string"},
-            {"id": "a8", "name": "Codigo", "value": "={{ $json.body.Codigo || '' }}", "type": "string"},
-            {"id": "a9", "name": "Cantidad", "value": "={{ $json.body.Cantidad || 1 }}", "type": "number"},
-            {"id": "a10", "name": "Total", "value": "={{ $json.body.Total || 0 }}", "type": "number"},
-            {"id": "a11", "name": "Stock_Actual", "value": "={{ $json.body.Stock_Actual || 0 }}", "type": "number"},
-            {"id": "a12", "name": "Stock_Minimo", "value": "={{ $json.body.Stock_Minimo || 0 }}", "type": "number"},
-            {"id": "a13", "name": "Proveedor", "value": "={{ $json.body.Proveedor || '' }}", "type": "string"},
-            {"id": "a14", "name": "fecha", "value": "={{ $json.body.fecha || '' }}", "type": "string"},
-            {"id": "a15", "name": "hora", "value": "={{ $json.body.hora || '' }}", "type": "string"},
-            {"id": "a16", "name": "fuente", "value": "={{ $json.body.fuente || 'Simulador NovaSync' }}", "type": "string"},
-            {"id": "a17", "name": "mensaje", "value": "={{ $json.body.mensaje || '' }}", "type": "string"}
+            {
+              "id": "a1",
+              "name": "nombre",
+              "value": "={{ $json.body.nombre || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "empresa",
+              "value": "={{ $json.body.empresa || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "email",
+              "value": "={{ $json.body.email || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "cargo",
+              "value": "={{ $json.body.cargo || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "Score_IA",
+              "value": "={{ $json.body.Score_IA || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "a6",
+              "name": "Estado_Venta",
+              "value": "={{ $json.body.Estado_Venta || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a7",
+              "name": "Producto_Comprado",
+              "value": "={{ $json.body.Producto_Comprado || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a8",
+              "name": "Codigo",
+              "value": "={{ $json.body.Codigo || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a9",
+              "name": "Cantidad",
+              "value": "={{ $json.body.Cantidad || 1 }}",
+              "type": "number"
+            },
+            {
+              "id": "a10",
+              "name": "Total",
+              "value": "={{ $json.body.Total || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "a11",
+              "name": "Stock_Actual",
+              "value": "={{ $json.body.Stock_Actual || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "a12",
+              "name": "Stock_Minimo",
+              "value": "={{ $json.body.Stock_Minimo || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "a13",
+              "name": "Proveedor",
+              "value": "={{ $json.body.Proveedor || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a14",
+              "name": "fecha",
+              "value": "={{ $json.body.fecha || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a15",
+              "name": "hora",
+              "value": "={{ $json.body.hora || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a16",
+              "name": "fuente",
+              "value": "={{ $json.body.fuente || 'Simulador NovaSync' }}",
+              "type": "string"
+            },
+            {
+              "id": "a17",
+              "name": "mensaje",
+              "value": "={{ $json.body.mensaje || '' }}",
+              "type": "string"
+            }
           ]
         },
         "options": {}
@@ -72,7 +166,10 @@
       "name": "🔧 Normalizar Datos Webhook",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-560, 700]
+      "position": [
+        -560,
+        700
+      ]
     },
     {
       "parameters": {
@@ -84,15 +181,6 @@
             "version": 2
           },
           "conditions": [
-            {
-              "id": "cond-score-alto",
-              "leftValue": "={{ $json.Score_IA }}",
-              "rightValue": 8,
-              "operator": {
-                "type": "number",
-                "operation": "gte"
-              }
-            },
             {
               "id": "cond-compro",
               "leftValue": "={{ $json.Estado_Venta }}",
@@ -108,22 +196,28 @@
         "options": {}
       },
       "id": "b4d30b85-d6a6-4b88-ac70-e22a8c008dc0",
-      "name": "🎯 ¿Score ≥ 8 y Compró?",
+      "name": "🎯 ¿Es una venta real?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-340, 700]
+      "position": [
+        -340,
+        700
+      ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { status: 'ignored', motivo: 'Score_IA < 8 o Estado_Venta no coincide con Compró' } }}",
+        "responseBody": "={{ { status: 'ignored', motivo: 'Estado_Venta no es Compró — descartado' } }}",
         "options": {}
       },
       "id": "respond-ignored-001",
       "name": "🔁 Respond: Sin acción",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-340, 880]
+      "position": [
+        -340,
+        880
+      ]
     },
     {
       "parameters": {
@@ -133,7 +227,10 @@
       "name": "⚙️ Cruzar Lead + Inventario",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [340, 580]
+      "position": [
+        340,
+        580
+      ]
     },
     {
       "parameters": {
@@ -161,7 +258,10 @@
       "name": "⚠️ ¿Generar Orden?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [560, 580]
+      "position": [
+        560,
+        580
+      ]
     },
     {
       "parameters": {
@@ -173,7 +273,10 @@
       "name": "🔁 Respond: Orden Generada",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [780, 400]
+      "position": [
+        780,
+        400
+      ]
     },
     {
       "parameters": {
@@ -185,7 +288,10 @@
       "name": "🔁 Respond: Venta Procesada",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [780, 780]
+      "position": [
+        780,
+        780
+      ]
     },
     {
       "parameters": {
@@ -195,7 +301,10 @@
       "name": "⚙️ Preparar Prompt Alerta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1000, 480]
+      "position": [
+        1000,
+        480
+      ]
     },
     {
       "parameters": {
@@ -204,8 +313,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {"name": "Content-Type", "value": "application/json"},
-            {"name": "x-goog-api-key", "value": "AIzaSyDI2S_g3amRLoPwzPyRwYBTVCnKfVFpsgE"}
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyDI2S_g3amRLoPwzPyRwYBTVCnKfVFpsgE"
+            }
           ]
         },
         "sendBody": true,
@@ -218,7 +333,10 @@
       "name": "🤖 Gemini - Generar Orden",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
-      "position": [1220, 480]
+      "position": [
+        1220,
+        480
+      ]
     },
     {
       "parameters": {
@@ -228,7 +346,10 @@
       "name": "📝 Parsear Alerta IA",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1440, 480]
+      "position": [
+        1440,
+        480
+      ]
     },
     {
       "parameters": {
@@ -239,13 +360,18 @@
           "mode": "name"
         },
         "text": "={{ $json.mensajeFinal }}",
-        "otherOptions": {"mrkdwn": true}
+        "otherOptions": {
+          "mrkdwn": true
+        }
       },
       "id": "7a8db477-c3be-4537-a9c0-676750dec23b",
       "name": "📣 Slack — Alerta Stock Crítico",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.1,
-      "position": [1660, 480],
+      "position": [
+        1660,
+        480
+      ],
       "credentials": {
         "slackApi": {
           "id": "7Qns5AljUCiLXtf4",
@@ -262,13 +388,18 @@
           "mode": "name"
         },
         "text": "={{ $json.mensajeSlack }}",
-        "otherOptions": {"mrkdwn": true}
+        "otherOptions": {
+          "mrkdwn": true
+        }
       },
       "id": "e03d92e6-fd01-4af6-8d50-9106aa2d1a98",
       "name": "📣 Slack — Notificación Venta",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.1,
-      "position": [1000, 700],
+      "position": [
+        1000,
+        700
+      ],
       "credentials": {
         "slackApi": {
           "id": "7Qns5AljUCiLXtf4",
@@ -299,10 +430,30 @@
             "Código": "={{ $json.codigo }}",
             "Stock Actual": "={{ $json.stockActual }}"
           },
-          "matchingColumns": ["Código"],
+          "matchingColumns": [
+            "Código"
+          ],
           "schema": [
-            {"id": "Código", "displayName": "Código", "required": false, "defaultMatch": true, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Stock Actual", "displayName": "Stock Actual", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false}
+            {
+              "id": "Código",
+              "displayName": "Código",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Stock Actual",
+              "displayName": "Stock Actual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
           ]
         },
         "options": {}
@@ -311,7 +462,10 @@
       "name": "🔄 Actualizar Stock en Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
-      "position": [340, 760],
+      "position": [
+        340,
+        760
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "FTpPj23iveMrq8Uw",
@@ -356,24 +510,170 @@
             "Proveedor": "={{ $json.proveedor }}",
             "Mensaje_Slack": "={{ $json.mensajeFinal }}"
           },
-          "matchingColumns": ["row_number"],
+          "matchingColumns": [
+            "row_number"
+          ],
           "schema": [
-            {"id": "Fecha", "displayName": "Fecha", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Hora", "displayName": "Hora", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Lead", "displayName": "Lead", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Empresa", "displayName": "Empresa", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Email", "displayName": "Email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Score_IA", "displayName": "Score_IA", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Producto", "displayName": "Producto", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Código", "displayName": "Código", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Cantidad", "displayName": "Cantidad", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Total_Venta", "displayName": "Total_Venta", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Stock_Post_Venta", "displayName": "Stock_Post_Venta", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Stock_Mínimo", "displayName": "Stock_Mínimo", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Estado_Stock", "displayName": "Estado_Stock", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Orden_Generada", "displayName": "Orden_Generada", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Proveedor", "displayName": "Proveedor", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
-            {"id": "Mensaje_Slack", "displayName": "Mensaje_Slack", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false}
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Hora",
+              "displayName": "Hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lead",
+              "displayName": "Lead",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Empresa",
+              "displayName": "Empresa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score_IA",
+              "displayName": "Score_IA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Producto",
+              "displayName": "Producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Código",
+              "displayName": "Código",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cantidad",
+              "displayName": "Cantidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total_Venta",
+              "displayName": "Total_Venta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Stock_Post_Venta",
+              "displayName": "Stock_Post_Venta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Stock_Mínimo",
+              "displayName": "Stock_Mínimo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estado_Stock",
+              "displayName": "Estado_Stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Orden_Generada",
+              "displayName": "Orden_Generada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Proveedor",
+              "displayName": "Proveedor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mensaje_Slack",
+              "displayName": "Mensaje_Slack",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
           ]
         },
         "options": {}
@@ -382,7 +682,10 @@
       "name": "📊 Registrar en Ops_Alertas",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
-      "position": [1220, 700],
+      "position": [
+        1220,
+        700
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "FTpPj23iveMrq8Uw",
@@ -395,61 +698,135 @@
   "connections": {
     "Webhook": {
       "main": [
-        [{"node": "🔧 Normalizar Datos Webhook", "type": "main", "index": 0}]
+        [
+          {
+            "node": "🔧 Normalizar Datos Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "🔧 Normalizar Datos Webhook": {
       "main": [
-        [{"node": "🎯 ¿Score ≥ 8 y Compró?", "type": "main", "index": 0}]
-      ]
-    },
-    "🎯 ¿Score ≥ 8 y Compró?": {
-      "main": [
-        [{"node": "⚙️ Cruzar Lead + Inventario", "type": "main", "index": 0}],
-        [{"node": "🔁 Respond: Sin acción", "type": "main", "index": 0}]
+        [
+          {
+            "node": "🎯 ¿Es una venta real?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "⚙️ Cruzar Lead + Inventario": {
       "main": [
         [
-          {"node": "⚠️ ¿Generar Orden?", "type": "main", "index": 0},
-          {"node": "🔄 Actualizar Stock en Sheets", "type": "main", "index": 0},
-          {"node": "📊 Registrar en Ops_Alertas", "type": "main", "index": 0}
+          {
+            "node": "⚠️ ¿Generar Orden?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔄 Actualizar Stock en Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📊 Registrar en Ops_Alertas",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "⚠️ ¿Generar Orden?": {
       "main": [
         [
-          {"node": "⚙️ Preparar Prompt Alerta", "type": "main", "index": 0},
-          {"node": "🔁 Respond: Orden Generada", "type": "main", "index": 0}
+          {
+            "node": "⚙️ Preparar Prompt Alerta",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔁 Respond: Orden Generada",
+            "type": "main",
+            "index": 0
+          }
         ],
         [
-          {"node": "📣 Slack — Notificación Venta", "type": "main", "index": 0},
-          {"node": "🔁 Respond: Venta Procesada", "type": "main", "index": 0}
+          {
+            "node": "📣 Slack — Notificación Venta",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔁 Respond: Venta Procesada",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "⚙️ Preparar Prompt Alerta": {
       "main": [
-        [{"node": "🤖 Gemini - Generar Orden", "type": "main", "index": 0}]
+        [
+          {
+            "node": "🤖 Gemini - Generar Orden",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "🤖 Gemini - Generar Orden": {
       "main": [
-        [{"node": "📝 Parsear Alerta IA", "type": "main", "index": 0}]
+        [
+          {
+            "node": "📝 Parsear Alerta IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "📝 Parsear Alerta IA": {
       "main": [
-        [{"node": "📣 Slack — Alerta Stock Crítico", "type": "main", "index": 0}]
+        [
+          {
+            "node": "📣 Slack — Alerta Stock Crítico",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "📣 Slack — Alerta Stock Crítico": {
-      "main": [[]]
+      "main": [
+        []
+      ]
     },
     "📣 Slack — Notificación Venta": {
-      "main": [[]]
+      "main": [
+        []
+      ]
+    },
+    "🎯 ¿Es una venta real?": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Cruzar Lead + Inventario",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🔁 Respond: Sin acción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -463,8 +840,23 @@
   },
   "id": "dVqEwHttRRBG1WIm",
   "tags": [
-    {"name": "NovaSync", "id": "LTa3nmujgTAjxXNv", "createdAt": "2026-05-16T14:24:23.421Z", "updatedAt": "2026-05-16T14:24:23.421Z"},
-    {"name": "Gemini Free", "id": "MpWueOLFF0dmoQzJ", "createdAt": "2026-05-16T14:24:23.479Z", "updatedAt": "2026-05-16T14:24:23.479Z"},
-    {"name": "Ops", "id": "dTXSmvoQeNM5fQo9", "createdAt": "2026-05-16T14:24:23.454Z", "updatedAt": "2026-05-16T14:24:23.454Z"}
+    {
+      "name": "NovaSync",
+      "id": "LTa3nmujgTAjxXNv",
+      "createdAt": "2026-05-16T14:24:23.421Z",
+      "updatedAt": "2026-05-16T14:24:23.421Z"
+    },
+    {
+      "name": "Gemini Free",
+      "id": "MpWueOLFF0dmoQzJ",
+      "createdAt": "2026-05-16T14:24:23.479Z",
+      "updatedAt": "2026-05-16T14:24:23.479Z"
+    },
+    {
+      "name": "Ops",
+      "id": "dTXSmvoQeNM5fQo9",
+      "createdAt": "2026-05-16T14:24:23.454Z",
+      "updatedAt": "2026-05-16T14:24:23.454Z"
+    }
   ]
 }

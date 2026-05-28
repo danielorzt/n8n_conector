@@ -170,8 +170,9 @@ const ProductCard = memo(function ProductCard({
           </span>
         </div>
 
-        {/* Score Badge */}
-        <div className="absolute right-3 top-3">
+        {/* Top-right: IA score + CRUD actions stacked */}
+        <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
+          {/* IA Score pill */}
           <div className={cn(
             "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium transition-colors",
             isSelected
@@ -180,32 +181,32 @@ const ProductCard = memo(function ProductCard({
           )}>
             IA: {product.score_ia}/10
           </div>
+
+          {/* CRUD buttons — appear below score on hover */}
+          {(onEdit || onDelete) && !deleteConfirm && (
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-150 translate-y-1 group-hover:translate-y-0">
+              {onEdit && (
+                <button
+                  onClick={handleEdit}
+                  title={t.editProduct}
+                  className="size-6 rounded-md border border-border/80 bg-card/95 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/60 hover:bg-primary/10 transition-colors shadow-sm"
+                >
+                  <Pencil className="size-3" />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={handleDeleteClick}
+                  title={t.delete}
+                  className="size-6 rounded-md border border-border/80 bg-card/95 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive/60 hover:bg-destructive/10 transition-colors shadow-sm"
+                >
+                  <Trash2 className="size-3" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </button>
-
-      {/* Inline CRUD actions — show on hover (if handlers provided) */}
-      {(onEdit || onDelete) && !deleteConfirm && (
-        <div className="absolute bottom-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {onEdit && (
-            <button
-              onClick={handleEdit}
-              title={t.editProduct}
-              className="size-7 rounded-lg border border-border bg-card/90 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/10 transition-colors shadow-sm"
-            >
-              <Pencil className="size-3.5" />
-            </button>
-          )}
-          {onDelete && (
-            <button
-              onClick={handleDeleteClick}
-              title={t.delete}
-              className="size-7 rounded-lg border border-border bg-card/90 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive/50 hover:bg-destructive/10 transition-colors shadow-sm"
-            >
-              <Trash2 className="size-3.5" />
-            </button>
-          )}
-        </div>
-      )}
 
       {/* Delete confirmation overlay */}
       {deleteConfirm && (
